@@ -69,18 +69,8 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 
 	@Override
 	public void afterPropertiesSet() {
-		this.conversionService = createConversionService();
+		this.conversionService = new DefaultConversionService();
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
-	}
-
-	/**
-	 * Create the ConversionService instance returned by this factory bean.
-	 * <p>Creates a simple {@link GenericConversionService} instance by default.
-	 * Subclasses may override to customize the ConversionService instance that
-	 * gets created.
-	 */
-	protected GenericConversionService createConversionService() {
-		return new DefaultConversionService();
 	}
 
 
