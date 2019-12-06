@@ -16,13 +16,13 @@
 
 package org.springframework.beans;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.StringJoiner;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.util.StringJoiner;
 
 /**
  * Combined exception, composed of individual PropertyAccessException instances.
@@ -40,12 +40,15 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class PropertyBatchUpdateException extends BeansException {
 
-	/** List of PropertyAccessException objects. */
+	/**
+	 * List of PropertyAccessException objects.
+	 */
 	private final PropertyAccessException[] propertyAccessExceptions;
 
 
 	/**
 	 * Create a new PropertyBatchUpdateException.
+	 *
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
 	public PropertyBatchUpdateException(PropertyAccessException[] propertyAccessExceptions) {

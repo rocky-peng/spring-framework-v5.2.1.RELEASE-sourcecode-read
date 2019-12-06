@@ -72,7 +72,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Cache of singleton objects: bean name to bean instance.
-	 *
 	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
@@ -102,38 +101,31 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	private final Set<String> inCreationCheckExclusions =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
-
+	/**
+	 * Disposable bean instances: bean name to disposable instance.
+	 */
+	private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
+	/**
+	 * Map between containing bean names: bean name to Set of bean names that the bean contains.
+	 */
+	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
+	/**
+	 * Map between dependent bean names: bean name to Set of dependent bean names.
+	 */
+	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
+	/**
+	 * Map between depending bean names: bean name to Set of bean names for the bean's dependencies.
+	 */
+	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 	/**
 	 * List of suppressed Exceptions, available for associating related causes.
 	 */
 	@Nullable
 	private Set<Exception> suppressedExceptions;
-
 	/**
 	 * Flag that indicates whether we're currently within destroySingletons.
 	 */
 	private boolean singletonsCurrentlyInDestruction = false;
-
-	/**
-	 * Disposable bean instances: bean name to disposable instance.
-	 */
-	private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
-
-	/**
-	 * Map between containing bean names: bean name to Set of bean names that the bean contains.
-	 */
-	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
-
-	/**
-	 * Map between dependent bean names: bean name to Set of dependent bean names.
-	 */
-	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
-
-	/**
-	 * Map between depending bean names: bean name to Set of bean names for the bean's dependencies.
-	 */
-	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
-
 
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
@@ -423,7 +415,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
 	 *
-	 * @param containedBeanName          the name of the bean
+	 * @param containedBeanName  the name of the bean
 	 * @param containingBeanName the name of the dependent bean
 	 */
 	public void registerDependentBean(String containedBeanName, String containingBeanName) {
