@@ -16,17 +16,17 @@
 
 package org.springframework.instrument.classloading;
 
+import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.instrument.InstrumentationSavingAgent;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} relying on VM {@link Instrumentation}.
@@ -46,8 +46,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see InstrumentationSavingAgent
+ * @since 2.0
  */
 public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
@@ -74,6 +74,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 	/**
 	 * Create a new InstrumentationLoadTimeWeaver for the given ClassLoader.
+	 *
 	 * @param classLoader the ClassLoader that registered transformers are supposed to apply to
 	 */
 	public InstrumentationLoadTimeWeaver(@Nullable ClassLoader classLoader) {
@@ -81,6 +82,29 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		this.instrumentation = getInstrumentation();
 	}
 
+	/**
+	 * Check whether an Instrumentation instance is available for the current VM.
+	 *
+	 * @see #getInstrumentation()
+	 */
+	public static boolean isInstrumentationAvailable() {
+		return (getInstrumentation() != null);
+	}
+
+	/**
+	 * Obtain the Instrumentation instance for the current VM, if available.
+	 *
+	 * @return the Instrumentation instance, or {@code null} if none found
+	 * @see #isInstrumentationAvailable()
+	 */
+	@Nullable
+	private static Instrumentation getInstrumentation() {
+		if (AGENT_CLASS_PRESENT) {
+			return InstrumentationAccessor.getInstrumentation();
+		} else {
+			return null;
+		}
+	}
 
 	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
@@ -128,31 +152,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		}
 	}
 
-
-	/**
-	 * Check whether an Instrumentation instance is available for the current VM.
-	 * @see #getInstrumentation()
-	 */
-	public static boolean isInstrumentationAvailable() {
-		return (getInstrumentation() != null);
-	}
-
-	/**
-	 * Obtain the Instrumentation instance for the current VM, if available.
-	 * @return the Instrumentation instance, or {@code null} if none found
-	 * @see #isInstrumentationAvailable()
-	 */
-	@Nullable
-	private static Instrumentation getInstrumentation() {
-		if (AGENT_CLASS_PRESENT) {
-			return InstrumentationAccessor.getInstrumentation();
-		}
-		else {
-			return null;
-		}
-	}
-
-
 	/**
 	 * Inner class to avoid InstrumentationSavingAgent dependency.
 	 */
@@ -184,7 +183,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 		@Override
 		@Nullable
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+								ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
 			if (this.targetClassLoader != loader) {
 				return null;

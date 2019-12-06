@@ -16,16 +16,6 @@
 
 package org.springframework.jmx.export.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
@@ -45,6 +35,16 @@ import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * Implementation of the {@code JmxAttributeSource} interface that
  * reads annotations and exposes the corresponding attributes.
@@ -53,16 +53,50 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Jennifer Hickey
  * @author Stephane Nicoll
- * @since 1.2
  * @see ManagedResource
  * @see ManagedAttribute
  * @see ManagedOperation
+ * @since 1.2
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFactoryAware {
 
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	private static List<MergedAnnotation<? extends Annotation>> getRepeatableAnnotations(
+			AnnotatedElement annotatedElement, Class<? extends Annotation> annotationType,
+			Class<? extends Annotation> containerAnnotationType) {
+
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY,
+				RepeatableContainers.of(annotationType, containerAnnotationType))
+				.stream(annotationType)
+				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+				.map(MergedAnnotation::withNonMergedAttributes)
+				.collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T[] copyPropertiesToBeanArray(
+			List<MergedAnnotation<? extends Annotation>> anns, Class<T> beanClass) {
+
+		T[] beans = (T[]) Array.newInstance(beanClass, anns.size());
+		int i = 0;
+		for (MergedAnnotation<? extends Annotation> ann : anns) {
+			beans[i++] = copyPropertiesToBean(ann, beanClass);
+		}
+		return beans;
+	}
+
+	@Nullable
+	private static <T> T copyPropertiesToBean(MergedAnnotation<? extends Annotation> ann, Class<T> beanClass) {
+		if (!ann.isPresent()) {
+			return null;
+		}
+		T bean = BeanUtils.instantiateClass(beanClass);
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
+		bw.setPropertyValues(new MutablePropertyValues(ann.asMap()));
+		return bean;
+	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -70,7 +104,6 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
 	}
-
 
 	@Override
 	@Nullable
@@ -159,42 +192,6 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 				clazz, ManagedNotification.class, ManagedNotifications.class);
 
 		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedNotification.class);
-	}
-
-
-	private static List<MergedAnnotation<? extends Annotation>> getRepeatableAnnotations(
-			AnnotatedElement annotatedElement, Class<? extends Annotation> annotationType,
-			Class<? extends Annotation> containerAnnotationType) {
-
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.TYPE_HIERARCHY,
-				RepeatableContainers.of(annotationType, containerAnnotationType))
-				.stream(annotationType)
-				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-				.map(MergedAnnotation::withNonMergedAttributes)
-				.collect(Collectors.toList());
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T[] copyPropertiesToBeanArray(
-			List<MergedAnnotation<? extends Annotation>> anns, Class<T> beanClass) {
-
-		T[] beans = (T[]) Array.newInstance(beanClass, anns.size());
-		int i = 0;
-		for (MergedAnnotation<? extends Annotation> ann : anns) {
-			beans[i++] = copyPropertiesToBean(ann, beanClass);
-		}
-		return beans;
-	}
-
-	@Nullable
-	private static <T> T copyPropertiesToBean(MergedAnnotation<? extends Annotation> ann, Class<T> beanClass) {
-		if (!ann.isPresent()) {
-			return null;
-		}
-		T bean = BeanUtils.instantiateClass(beanClass);
-		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
-		bw.setPropertyValues(new MutablePropertyValues(ann.asMap()));
-		return bean;
 	}
 
 }

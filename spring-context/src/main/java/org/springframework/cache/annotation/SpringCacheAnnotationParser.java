@@ -16,15 +16,6 @@
 
 package org.springframework.cache.annotation;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
@@ -33,6 +24,15 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Strategy implementation for parsing Spring's {@link Caching}, {@link Cacheable},
@@ -202,7 +202,8 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	 * <p>Throws an {@link IllegalStateException} if the state of the operation is
 	 * invalid. As there might be multiple sources for default values, this ensure
 	 * that the operation is in a proper state before being returned.
-	 * @param ae the annotated element of the cache operation
+	 *
+	 * @param ae        the annotated element of the cache operation
 	 * @param operation the {@link CacheOperation} to validate
 	 */
 	private void validateCacheOperation(AnnotatedElement ae, CacheOperation operation) {
@@ -259,6 +260,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 
 		/**
 		 * Apply the defaults to the specified {@link CacheOperation.Builder}.
+		 *
 		 * @param builder the operation builder to update
 		 */
 		public void applyDefault(CacheOperation.Builder builder) {
@@ -283,11 +285,9 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 
 			if (StringUtils.hasText(builder.getCacheManager()) || StringUtils.hasText(builder.getCacheResolver())) {
 				// One of these is set so we should not inherit anything
-			}
-			else if (StringUtils.hasText(this.cacheResolver)) {
+			} else if (StringUtils.hasText(this.cacheResolver)) {
 				builder.setCacheResolver(this.cacheResolver);
-			}
-			else if (StringUtils.hasText(this.cacheManager)) {
+			} else if (StringUtils.hasText(this.cacheManager)) {
 				builder.setCacheManager(this.cacheManager);
 			}
 		}
