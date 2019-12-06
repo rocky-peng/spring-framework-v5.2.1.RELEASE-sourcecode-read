@@ -16,6 +16,27 @@
 
 package org.springframework.web.servlet.function;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.ReadListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,50 +52,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.jetbrains.annotations.NotNull;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.GenericHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
-
 /**
  * Default {@link ServerRequest.Builder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
-
-	private HttpServletRequest servletRequest;
-
-	private String methodName;
-
-	private URI uri;
-
 	private final HttpHeaders headers = new HttpHeaders();
-
 	private final MultiValueMap<String, Cookie> cookies = new LinkedMultiValueMap<>();
-
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
-
+	private HttpServletRequest servletRequest;
+	private String methodName;
+	private URI uri;
 	private byte[] body = new byte[0];
 
 
@@ -173,19 +165,15 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		private final HttpHeaders headers;
 
 		private final HttpServletRequest servletRequest;
-
+		private final Map<String, Object> attributes;
+		private final byte[] body;
+		private final List<HttpMessageConverter<?>> messageConverters;
 		private MultiValueMap<String, Cookie> cookies;
 
-		private final Map<String, Object> attributes;
-
-		private final byte[] body;
-
-		private final List<HttpMessageConverter<?>> messageConverters;
-
 		public BuiltServerRequest(HttpServletRequest servletRequest, String methodName, URI uri,
-				HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
-				Map<String, Object> attributes, byte[] body,
-				List<HttpMessageConverter<?>> messageConverters) {
+								  HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
+								  Map<String, Object> attributes, byte[] body,
+								  List<HttpMessageConverter<?>> messageConverters) {
 			this.servletRequest = servletRequest;
 			this.methodName = methodName;
 			this.uri = uri;
@@ -284,8 +272,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 					.get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			if (pathVariables != null) {
 				return pathVariables;
-			}
-			else {
+			} else {
 				return Collections.emptyMap();
 			}
 		}

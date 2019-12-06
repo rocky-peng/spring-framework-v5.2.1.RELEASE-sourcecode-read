@@ -16,13 +16,12 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.nio.charset.Charset;
-import java.util.function.Supplier;
+import org.springframework.lang.Nullable;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-
-import org.springframework.lang.Nullable;
+import java.nio.charset.Charset;
+import java.util.function.Supplier;
 
 /**
  * Interface to be implemented by objects that configure and manage a
@@ -42,6 +41,7 @@ public interface ScriptTemplateConfig {
 
 	/**
 	 * Return the engine supplier that will be used to instantiate the {@link ScriptEngine}.
+	 *
 	 * @since 5.2
 	 */
 	@Nullable
@@ -81,6 +81,7 @@ public interface ScriptTemplateConfig {
 
 	/**
 	 * Return the content type to use for the response.
+	 *
 	 * @since 4.2.1
 	 */
 	@Nullable

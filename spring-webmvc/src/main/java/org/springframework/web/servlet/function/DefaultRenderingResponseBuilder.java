@@ -16,17 +16,6 @@
 
 package org.springframework.web.servlet.function;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.Conventions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,6 +24,16 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Default {@link RenderingResponse.Builder} implementation.
@@ -45,14 +44,10 @@ import org.springframework.web.servlet.ModelAndView;
 final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder {
 
 	private final String name;
-
-	private int status = HttpStatus.OK.value();
-
 	private final HttpHeaders headers = new HttpHeaders();
-
 	private final MultiValueMap<String, Cookie> cookies = new LinkedMultiValueMap<>();
-
 	private final Map<String, Object> model = new LinkedHashMap<>();
+	private int status = HttpStatus.OK.value();
 
 
 	public DefaultRenderingResponseBuilder(RenderingResponse other) {
@@ -158,7 +153,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 		private final Map<String, Object> model;
 
 		public DefaultRenderingResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, String name, Map<String, Object> model) {
+										MultiValueMap<String, Cookie> cookies, String name, Map<String, Object> model) {
 
 			super(statusCode, headers, cookies);
 			this.name = name;
@@ -177,14 +172,13 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 
 		@Override
 		protected ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context) {
+											   HttpServletResponse response, Context context) {
 
 			HttpStatus status = HttpStatus.resolve(this.statusCode);
 			ModelAndView mav;
 			if (status != null) {
 				mav = new ModelAndView(this.name, status);
-			}
-			else {
+			} else {
 				mav = new ModelAndView(this.name);
 			}
 			mav.addAllObjects(this.model);

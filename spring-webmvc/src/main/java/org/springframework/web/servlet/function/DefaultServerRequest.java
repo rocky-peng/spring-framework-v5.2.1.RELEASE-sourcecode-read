@@ -16,6 +16,28 @@
 
 package org.springframework.web.servlet.function;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -34,30 +56,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.jetbrains.annotations.NotNull;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRange;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.GenericHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
@@ -81,7 +79,7 @@ class DefaultServerRequest implements ServerRequest {
 
 
 	public DefaultServerRequest(HttpServletRequest servletRequest,
-			List<HttpMessageConverter<?>> messageConverters) {
+								List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
 		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
 		this.allSupportedMediaTypes = allSupportedMediaTypes(messageConverters);
@@ -96,6 +94,19 @@ class DefaultServerRequest implements ServerRequest {
 				.flatMap(converter -> converter.getSupportedMediaTypes().stream())
 				.sorted(MediaType.SPECIFICITY_COMPARATOR)
 				.collect(Collectors.toList());
+	}
+
+	static Class<?> bodyClass(Type type) {
+		if (type instanceof Class) {
+			return (Class<?>) type;
+		}
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			if (parameterizedType.getRawType() instanceof Class) {
+				return (Class<?>) parameterizedType.getRawType();
+			}
+		}
+		return Object.class;
 	}
 
 	@Override
@@ -167,19 +178,6 @@ class DefaultServerRequest implements ServerRequest {
 		return bodyInternal(type, bodyClass(type));
 	}
 
-	static Class<?> bodyClass(Type type) {
-		if (type instanceof Class) {
-			return (Class<?>) type;
-		}
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			if (parameterizedType.getRawType() instanceof Class) {
-				return (Class<?>) parameterizedType.getRawType();
-			}
-		}
-		return Object.class;
-	}
-
 	@SuppressWarnings("unchecked")
 	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
 			throws ServletException, IOException {
@@ -232,8 +230,7 @@ class DefaultServerRequest implements ServerRequest {
 				.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		if (pathVariables != null) {
 			return pathVariables;
-		}
-		else {
+		} else {
 			return Collections.emptyMap();
 		}
 	}
@@ -344,8 +341,7 @@ class DefaultServerRequest implements ServerRequest {
 			String[] parameterValues = this.servletRequest.getParameterValues(name);
 			if (!ObjectUtils.isEmpty(parameterValues)) {
 				return Arrays.asList(parameterValues);
-			}
-			else {
+			} else {
 				return Collections.emptyList();
 			}
 		}

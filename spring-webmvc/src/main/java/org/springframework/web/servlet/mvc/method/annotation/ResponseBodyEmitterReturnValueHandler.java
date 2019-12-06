@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.function.Consumer;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -44,6 +36,13 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Handler for return values of type {@link ResponseBodyEmitter} and sub-classes
@@ -77,14 +76,15 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 	/**
 	 * Complete constructor with pluggable "reactive" type support.
+	 *
 	 * @param messageConverters converters to write emitted objects with
-	 * @param registry for reactive return value type support
-	 * @param executor for blocking I/O writes of items emitted from reactive types
-	 * @param manager for detecting streaming media types
+	 * @param registry          for reactive return value type support
+	 * @param executor          for blocking I/O writes of items emitted from reactive types
+	 * @param manager           for detecting streaming media types
 	 * @since 5.0
 	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
-			ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager) {
+												 ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager) {
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
@@ -105,7 +105,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	@Override
 	@SuppressWarnings("resource")
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
-			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+								  ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
 			mavContainer.setRequestHandled(true);
@@ -135,8 +135,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		ResponseBodyEmitter emitter;
 		if (returnValue instanceof ResponseBodyEmitter) {
 			emitter = (ResponseBodyEmitter) returnValue;
-		}
-		else {
+		} else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
 			if (emitter == null) {
 				// Not streaming: write headers without committing response..
@@ -163,71 +162,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		HttpMessageConvertingHandler handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);
 		emitter.initialize(handler);
 	}
-
-
-	/**
-	 * ResponseBodyEmitter.Handler that writes with HttpMessageConverter's.
-	 */
-	private class HttpMessageConvertingHandler implements ResponseBodyEmitter.Handler {
-
-		private final ServerHttpResponse outputMessage;
-
-		private final DeferredResult<?> deferredResult;
-
-		public HttpMessageConvertingHandler(ServerHttpResponse outputMessage, DeferredResult<?> deferredResult) {
-			this.outputMessage = outputMessage;
-			this.deferredResult = deferredResult;
-		}
-
-		@Override
-		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
-			sendInternal(data, mediaType);
-		}
-
-		@SuppressWarnings("unchecked")
-		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
-			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
-				if (converter.canWrite(data.getClass(), mediaType)) {
-					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);
-					this.outputMessage.flush();
-					return;
-				}
-			}
-			throw new IllegalArgumentException("No suitable converter for " + data.getClass());
-		}
-
-		@Override
-		public void complete() {
-			try {
-				this.outputMessage.flush();
-				this.deferredResult.setResult(null);
-			}
-			catch (IOException ex) {
-				this.deferredResult.setErrorResult(ex);
-			}
-		}
-
-		@Override
-		public void completeWithError(Throwable failure) {
-			this.deferredResult.setErrorResult(failure);
-		}
-
-		@Override
-		public void onTimeout(Runnable callback) {
-			this.deferredResult.onTimeout(callback);
-		}
-
-		@Override
-		public void onError(Consumer<Throwable> callback) {
-			this.deferredResult.onError(callback);
-		}
-
-		@Override
-		public void onCompletion(Runnable callback) {
-			this.deferredResult.onCompletion(callback);
-		}
-	}
-
 
 	/**
 	 * Wrap to silently ignore header changes HttpMessageConverter's that would
@@ -267,6 +201,68 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		@Override
 		public void close() {
 			this.delegate.close();
+		}
+	}
+
+	/**
+	 * ResponseBodyEmitter.Handler that writes with HttpMessageConverter's.
+	 */
+	private class HttpMessageConvertingHandler implements ResponseBodyEmitter.Handler {
+
+		private final ServerHttpResponse outputMessage;
+
+		private final DeferredResult<?> deferredResult;
+
+		public HttpMessageConvertingHandler(ServerHttpResponse outputMessage, DeferredResult<?> deferredResult) {
+			this.outputMessage = outputMessage;
+			this.deferredResult = deferredResult;
+		}
+
+		@Override
+		public void send(Object data, @Nullable MediaType mediaType) throws IOException {
+			sendInternal(data, mediaType);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> void sendInternal(T data, @Nullable MediaType mediaType) throws IOException {
+			for (HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
+				if (converter.canWrite(data.getClass(), mediaType)) {
+					((HttpMessageConverter<T>) converter).write(data, mediaType, this.outputMessage);
+					this.outputMessage.flush();
+					return;
+				}
+			}
+			throw new IllegalArgumentException("No suitable converter for " + data.getClass());
+		}
+
+		@Override
+		public void complete() {
+			try {
+				this.outputMessage.flush();
+				this.deferredResult.setResult(null);
+			} catch (IOException ex) {
+				this.deferredResult.setErrorResult(ex);
+			}
+		}
+
+		@Override
+		public void completeWithError(Throwable failure) {
+			this.deferredResult.setErrorResult(failure);
+		}
+
+		@Override
+		public void onTimeout(Runnable callback) {
+			this.deferredResult.onTimeout(callback);
+		}
+
+		@Override
+		public void onError(Consumer<Throwable> callback) {
+			this.deferredResult.onError(callback);
+		}
+
+		@Override
+		public void onCompletion(Runnable callback) {
+			this.deferredResult.onCompletion(callback);
 		}
 	}
 

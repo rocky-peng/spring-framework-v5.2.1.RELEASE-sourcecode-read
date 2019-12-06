@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.function.support;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.Ordered;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -32,6 +27,10 @@ import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
 /**
  * {@code HandlerAdapter} implementation that supports {@link HandlerFunction}s.
  *
@@ -42,19 +41,19 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
 	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 *
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
 	}
 
 	@Override
@@ -65,8 +64,8 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 	@Nullable
 	@Override
 	public ModelAndView handle(HttpServletRequest servletRequest,
-			HttpServletResponse servletResponse,
-			Object handler) throws Exception {
+							   HttpServletResponse servletResponse,
+							   Object handler) throws Exception {
 
 
 		HandlerFunction<?> handlerFunction = (HandlerFunction<?>) handler;

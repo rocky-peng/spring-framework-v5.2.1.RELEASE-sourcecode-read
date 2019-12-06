@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.function;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.function.Function;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -31,6 +25,12 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Lookup function used by {@link RouterFunctions#resources(String, Resource)}.
@@ -75,12 +75,10 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 			Resource resource = this.location.createRelative(path);
 			if (resource.exists() && resource.isReadable() && isResourceUnderLocation(resource)) {
 				return Optional.of(resource);
-			}
-			else {
+			} else {
 				return Optional.empty();
 			}
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new UncheckedIOException(ex);
 		}
 	}
@@ -90,8 +88,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		for (int i = 0; i < path.length(); i++) {
 			if (path.charAt(i) == '/') {
 				slash = true;
-			}
-			else if (path.charAt(i) > ' ' && path.charAt(i) != 127) {
+			} else if (path.charAt(i) > ' ' && path.charAt(i) != 127) {
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
@@ -113,8 +110,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 			}
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
-				return true;
-			}
+			return true;
+		}
 		return false;
 	}
 
@@ -129,12 +126,10 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		if (resource instanceof UrlResource) {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(this.location.getURL().toString());
-		}
-		else if (resource instanceof ClassPathResource) {
+		} else if (resource instanceof ClassPathResource) {
 			resourcePath = ((ClassPathResource) resource).getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) this.location).getPath());
-		}
-		else {
+		} else {
 			resourcePath = resource.getURL().getPath();
 			locationPath = StringUtils.cleanPath(this.location.getURL().getPath());
 		}

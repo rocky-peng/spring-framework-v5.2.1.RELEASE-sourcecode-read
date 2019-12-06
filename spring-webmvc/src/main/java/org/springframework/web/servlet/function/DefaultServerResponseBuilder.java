@@ -16,6 +16,24 @@
 
 package org.springframework.web.servlet.function;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
@@ -33,27 +51,9 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.servlet.ModelAndView;
-
 /**
  * Default {@link ServerResponse.BodyBuilder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
@@ -231,7 +231,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS =	EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
 
 		final int statusCode;
 
@@ -252,7 +252,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		protected <T extends ServerResponse> void addErrorHandler(Predicate<Throwable> predicate,
-				BiFunction<Throwable, ServerRequest, T> errorHandler) {
+																  BiFunction<Throwable, ServerRequest, T> errorHandler) {
 
 			Assert.notNull(predicate, "Predicate must not be null");
 			Assert.notNull(errorHandler, "ErrorHandler must not be null");
@@ -282,7 +282,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		@Override
 		public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response,
-				Context context) throws ServletException, IOException {
+									Context context) throws ServletException, IOException {
 
 			try {
 				writeStatusAndHeaders(response);
@@ -293,12 +293,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				if (SAFE_METHODS.contains(httpMethod) &&
 						servletWebRequest.checkNotModified(headers().getETag(), lastModified)) {
 					return null;
-				}
-				else {
+				} else {
 					return writeToInternal(request, response, context);
 				}
-			}
-			catch (Throwable throwable) {
+			} catch (Throwable throwable) {
 				return handleError(throwable, request, response, context);
 			}
 		}
@@ -335,12 +333,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		@Nullable
 		protected abstract ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context)
-		throws ServletException, IOException;
+														HttpServletResponse response, Context context)
+				throws ServletException, IOException;
 
 		@Nullable
 		protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
+										   HttpServletResponse servletResponse, Context context) {
 
 			return this.errorHandlers.stream()
 					.filter(errorHandler -> errorHandler.test(t))
@@ -352,11 +350,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 						ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
 						try {
 							return serverResponse.writeTo(servletRequest, servletResponse, context);
-						}
-						catch (ServletException ex) {
+						} catch (ServletException ex) {
 							throw new RuntimeException(ex);
-						}
-						catch (IOException ex) {
+						} catch (IOException ex) {
 							throw new UncheckedIOException(ex);
 						}
 					})
@@ -372,7 +368,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 					responseProvider;
 
 			public ErrorHandler(Predicate<Throwable> predicate,
-					BiFunction<Throwable, ServerRequest, T> responseProvider) {
+								BiFunction<Throwable, ServerRequest, T> responseProvider) {
 				Assert.notNull(predicate, "Predicate must not be null");
 				Assert.notNull(responseProvider, "ResponseProvider must not be null");
 				this.predicate = predicate;
@@ -398,8 +394,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 		public WriterFunctionResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies,
-				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+									  MultiValueMap<String, Cookie> cookies,
+									  BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
 			super(statusCode, headers, cookies);
 			Assert.notNull(writeFunction, "WriteFunction must not be null");
 			this.writeFunction = writeFunction;
@@ -407,13 +403,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		@Override
 		protected ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context) {
+											   HttpServletResponse response, Context context) {
 			return this.writeFunction.apply(request, response);
 		}
 	}
-
-
-
 
 
 }

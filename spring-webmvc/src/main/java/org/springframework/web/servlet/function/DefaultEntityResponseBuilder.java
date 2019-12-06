@@ -16,30 +16,9 @@
 
 package org.springframework.web.servlet.function;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -58,12 +37,31 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 /**
  * Default {@link EntityResponse.Builder} implementation.
  *
+ * @param <T> the entity type
  * @author Arjen Poutsma
  * @since 5.2
- * @param <T> the entity type
  */
 final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
@@ -74,17 +72,28 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	private final T entity;
 
 	private final Type entityType;
-
-	private int status = HttpStatus.OK.value();
-
 	private final HttpHeaders headers = new HttpHeaders();
-
 	private final MultiValueMap<String, Cookie> cookies = new LinkedMultiValueMap<>();
+	private int status = HttpStatus.OK.value();
 
 
 	private DefaultEntityResponseBuilder(T entity, @Nullable Type entityType) {
 		this.entity = entity;
 		this.entityType = (entityType != null) ? entityType : entity.getClass();
+	}
+
+	/**
+	 * Return a new {@link EntityResponse.Builder} from the given object.
+	 */
+	public static <T> EntityResponse.Builder<T> fromObject(T t) {
+		return new DefaultEntityResponseBuilder<>(t, null);
+	}
+
+	/**
+	 * Return a new {@link EntityResponse.Builder} from the given object and type reference.
+	 */
+	public static <T> EntityResponse.Builder<T> fromObject(T t, ParameterizedTypeReference<?> bodyType) {
+		return new DefaultEntityResponseBuilder<>(t, bodyType.getType());
 	}
 
 	@Override
@@ -201,31 +210,13 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			CompletionStage completionStage = (CompletionStage) this.entity;
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
-		}
-		else if (reactiveStreamsPresent && PublisherEntityResponse.isPublisher(this.entity)) {
+		} else if (reactiveStreamsPresent && PublisherEntityResponse.isPublisher(this.entity)) {
 			Publisher publisher = (Publisher) this.entity;
 			return new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher, this.entityType);
-		}
-		else {
+		} else {
 			return new DefaultEntityResponse<>(this.status, this.headers, this.cookies, this.entity, this.entityType);
 		}
 	}
-
-
-	/**
-	 * Return a new {@link EntityResponse.Builder} from the given object.
-	 */
-	public static <T> EntityResponse.Builder<T> fromObject(T t) {
-		return new DefaultEntityResponseBuilder<>(t, null);
-	}
-
-	/**
-	 * Return a new {@link EntityResponse.Builder} from the given object and type reference.
-	 */
-	public static <T> EntityResponse.Builder<T> fromObject(T t, ParameterizedTypeReference<?> bodyType) {
-		return new DefaultEntityResponseBuilder<>(t, bodyType.getType());
-	}
-
 
 	/**
 	 * Default {@link EntityResponse} implementation for synchronous bodies.
@@ -238,11 +229,30 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		private final Type entityType;
 
 		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
+									 MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
 
 			super(statusCode, headers, cookies);
 			this.entity = entity;
 			this.entityType = entityType;
+		}
+
+		@Nullable
+		private static MediaType getContentType(HttpServletResponse response) {
+			try {
+				return MediaType.parseMediaType(response.getContentType()).removeQualityValue();
+			} catch (InvalidMediaTypeException ex) {
+				return null;
+			}
+		}
+
+		private static List<MediaType> producibleMediaTypes(
+				List<HttpMessageConverter<?>> messageConverters,
+				Class<?> entityClass) {
+
+			return messageConverters.stream()
+					.filter(messageConverter -> messageConverter.canWrite(entityClass, null))
+					.flatMap(messageConverter -> messageConverter.getSupportedMediaTypes().stream())
+					.collect(Collectors.toList());
 		}
 
 		@Override
@@ -252,16 +262,16 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 		@Override
 		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context)
+											   HttpServletResponse servletResponse, Context context)
 				throws ServletException, IOException {
 
-			writeEntityWithMessageConverters(this.entity, servletRequest,servletResponse, context);
+			writeEntityWithMessageConverters(this.entity, servletRequest, servletResponse, context);
 			return null;
 		}
 
-		@SuppressWarnings({ "unchecked", "resource" })
+		@SuppressWarnings({"unchecked", "resource"})
 		protected void writeEntityWithMessageConverters(Object entity, HttpServletRequest request,
-				HttpServletResponse response, ServerResponse.Context context)
+														HttpServletResponse response, ServerResponse.Context context)
 				throws ServletException, IOException {
 
 			ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
@@ -278,7 +288,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 					}
 				}
 				if (messageConverter.canWrite(entityClass, contentType)) {
-					((HttpMessageConverter<Object>)messageConverter).write(entity, contentType, serverResponse);
+					((HttpMessageConverter<Object>) messageConverter).write(entity, contentType, serverResponse);
 					return;
 				}
 			}
@@ -287,34 +297,13 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 		}
 
-		@Nullable
-		private static MediaType getContentType(HttpServletResponse response) {
-			try {
-				return MediaType.parseMediaType(response.getContentType()).removeQualityValue();
-			}
-			catch (InvalidMediaTypeException ex) {
-				return null;
-			}
-		}
-
 		protected void tryWriteEntityWithMessageConverters(Object entity, HttpServletRequest request,
-				HttpServletResponse response, ServerResponse.Context context) {
+														   HttpServletResponse response, ServerResponse.Context context) {
 			try {
 				writeEntityWithMessageConverters(entity, request, response, context);
-			}
-			catch (IOException | ServletException ex) {
+			} catch (IOException | ServletException ex) {
 				handleError(ex, request, response, context);
 			}
-		}
-
-		private static List<MediaType> producibleMediaTypes(
-				List<HttpMessageConverter<?>> messageConverters,
-				Class<?> entityClass) {
-
-			return messageConverters.stream()
-					.filter(messageConverter -> messageConverter.canWrite(entityClass, null))
-					.flatMap(messageConverter -> messageConverter.getSupportedMediaTypes().stream())
-					.collect(Collectors.toList());
 		}
 
 	}
@@ -326,14 +315,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	private static class CompletionStageEntityResponse<T> extends DefaultEntityResponse<CompletionStage<T>> {
 
 		public CompletionStageEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, CompletionStage<T> entity, Type entityType) {
+											 MultiValueMap<String, Cookie> cookies, CompletionStage<T> entity, Type entityType) {
 
 			super(statusCode, headers, cookies, entity, entityType);
 		}
 
 		@Override
 		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
+											   HttpServletResponse servletResponse, Context context) {
 
 			AsyncContext asyncContext = servletRequest.startAsync(servletRequest, servletResponse);
 			entity().whenComplete((entity, throwable) -> {
@@ -344,12 +333,10 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 								(HttpServletRequest) asyncContext.getRequest(),
 								(HttpServletResponse) asyncContext.getResponse(),
 								context);
-					}
-					else if (throwable != null) {
+					} else if (throwable != null) {
 						handleError(throwable, servletRequest, servletResponse, context);
 					}
-				}
-				finally {
+				} finally {
 					asyncContext.complete();
 				}
 			});
@@ -361,72 +348,24 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	private static class PublisherEntityResponse<T> extends DefaultEntityResponse<Publisher<T>> {
 
 		public PublisherEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, Publisher<T> entity, Type entityType) {
+									   MultiValueMap<String, Cookie> cookies, Publisher<T> entity, Type entityType) {
 
 			super(statusCode, headers, cookies, entity, entityType);
-		}
-
-		@Override
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
-
-			AsyncContext asyncContext = servletRequest.startAsync(servletRequest,
-					new NoContentLengthResponseWrapper(servletResponse));
-			entity().subscribe(new ProducingSubscriber(asyncContext, context));
-			return null;
 		}
 
 		public static boolean isPublisher(Object entity) {
 			return (entity instanceof Publisher);
 		}
 
+		@Override
+		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
+											   HttpServletResponse servletResponse, Context context) {
 
-		@SuppressWarnings("SubscriberImplementation")
-		private class ProducingSubscriber implements Subscriber<T> {
-
-			private final AsyncContext asyncContext;
-
-			private final Context context;
-
-			@Nullable
-			private Subscription subscription;
-
-			public ProducingSubscriber(AsyncContext asyncContext, Context context) {
-				this.asyncContext = asyncContext;
-				this.context = context;
-			}
-
-			@Override
-			public void onSubscribe(Subscription s) {
-				if (this.subscription == null) {
-					this.subscription = s;
-					this.subscription.request(Long.MAX_VALUE);
-				}
-				else {
-					s.cancel();
-				}
-			}
-
-			@Override
-			public void onNext(T element) {
-				HttpServletRequest servletRequest = (HttpServletRequest) this.asyncContext.getRequest();
-				HttpServletResponse servletResponse = (HttpServletResponse) this.asyncContext.getResponse();
-				tryWriteEntityWithMessageConverters(element, servletRequest, servletResponse, this.context);
-			}
-
-			@Override
-			public void onError(Throwable t) {
-				handleError(t, (HttpServletRequest) this.asyncContext.getRequest(),
-						(HttpServletResponse) this.asyncContext.getResponse(), this.context);
-				this.asyncContext.complete();
-			}
-
-			@Override
-			public void onComplete() {
-				this.asyncContext.complete();
-			}
+			AsyncContext asyncContext = servletRequest.startAsync(servletRequest,
+					new NoContentLengthResponseWrapper(servletResponse));
+			entity().subscribe(new ProducingSubscriber(asyncContext, context));
+			return null;
 		}
-
 
 		private static class NoContentLengthResponseWrapper extends HttpServletResponseWrapper {
 
@@ -454,6 +393,51 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 			@Override
 			public void setContentLengthLong(long len) {
+			}
+		}
+
+		@SuppressWarnings("SubscriberImplementation")
+		private class ProducingSubscriber implements Subscriber<T> {
+
+			private final AsyncContext asyncContext;
+
+			private final Context context;
+
+			@Nullable
+			private Subscription subscription;
+
+			public ProducingSubscriber(AsyncContext asyncContext, Context context) {
+				this.asyncContext = asyncContext;
+				this.context = context;
+			}
+
+			@Override
+			public void onSubscribe(Subscription s) {
+				if (this.subscription == null) {
+					this.subscription = s;
+					this.subscription.request(Long.MAX_VALUE);
+				} else {
+					s.cancel();
+				}
+			}
+
+			@Override
+			public void onNext(T element) {
+				HttpServletRequest servletRequest = (HttpServletRequest) this.asyncContext.getRequest();
+				HttpServletResponse servletResponse = (HttpServletResponse) this.asyncContext.getResponse();
+				tryWriteEntityWithMessageConverters(element, servletRequest, servletResponse, this.context);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				handleError(t, (HttpServletRequest) this.asyncContext.getRequest(),
+						(HttpServletResponse) this.asyncContext.getResponse(), this.context);
+				this.asyncContext.complete();
+			}
+
+			@Override
+			public void onComplete() {
+				this.asyncContext.complete();
 			}
 		}
 	}

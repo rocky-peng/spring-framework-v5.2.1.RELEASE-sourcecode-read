@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.function;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
 
 /**
  * Implementation of {@link RouterFunctions.Visitor} that creates a formatted
@@ -74,7 +74,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	}
 
 	private void indent() {
-		for (int i=0; i < this.indent; i++) {
+		for (int i = 0; i < this.indent; i++) {
 			this.builder.append(' ');
 		}
 	}
@@ -85,8 +85,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void method(Set<HttpMethod> methods) {
 		if (methods.size() == 1) {
 			this.builder.append(methods.iterator().next());
-		}
-		else {
+		} else {
 			this.builder.append(methods);
 		}
 	}
@@ -156,6 +155,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void unknown(RequestPredicate predicate) {
 		this.builder.append(predicate);
 	}
+
 	@Override
 	public String toString() {
 		String result = this.builder.toString();

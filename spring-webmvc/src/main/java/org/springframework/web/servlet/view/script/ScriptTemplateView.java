@@ -16,26 +16,6 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -53,6 +33,25 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 /**
  * An {@link AbstractUrlBasedView} subclass designed to run any template library
  * based on a JSR-223 script engine.
@@ -67,9 +66,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
- * @since 4.2
  * @see ScriptTemplateConfigurer
  * @see ScriptTemplateViewResolver
+ * @since 4.2
  */
 public class ScriptTemplateView extends AbstractUrlBasedView {
 
@@ -120,6 +119,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Constructor for use as a bean.
+	 *
 	 * @see #setUrl
 	 */
 	public ScriptTemplateView() {
@@ -128,6 +128,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Create a new ScriptTemplateView with the given URL.
+	 *
 	 * @since 4.2.1
 	 */
 	public ScriptTemplateView(String url) {
@@ -135,16 +136,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		setContentType(null);
 	}
 
-
-	/**
-	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
-	 */
-	public void setEngine(ScriptEngine engine) {
-		this.engine = engine;
-	}
-
 	/**
 	 * See {@link ScriptTemplateConfigurer#setEngineSupplier(Supplier)} documentation.
+	 *
 	 * @since 5.2
 	 */
 	public void setEngineSupplier(Supplier<ScriptEngine> engineSupplier) {
@@ -209,7 +203,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
 		super.initApplicationContext(context);
@@ -263,15 +256,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Assert.isTrue(this.engine == null,
 					"When 'sharedEngine' is set to false, you should specify the " +
-					"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
-		}
-		else if (this.engine != null) {
+							"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
+		} else if (this.engine != null) {
 			loadScripts(this.engine);
-		}
-		else if (this.engineName != null) {
+		} else if (this.engineName != null) {
 			setEngine(createEngineFromName(this.engineName));
-		}
-		else {
+		} else {
 			setEngine(createEngineFromSupplier());
 		}
 
@@ -294,19 +284,24 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			if (engine == null) {
 				if (this.engineName != null) {
 					engine = createEngineFromName(this.engineName);
-				}
-				else {
+				} else {
 					engine = createEngineFromSupplier();
 				}
 				engines.put(engineKey, engine);
 			}
 			return engine;
-		}
-		else {
+		} else {
 			// Simply return the configured ScriptEngine...
 			Assert.state(this.engine != null, "No shared engine available");
 			return this.engine;
 		}
+	}
+
+	/**
+	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
+	 */
+	public void setEngine(ScriptEngine engine) {
+		this.engine = engine;
 	}
 
 	protected ScriptEngine createEngineFromName(String engineName) {
@@ -341,8 +336,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				}
 				try {
 					engine.eval(new InputStreamReader(resource.getInputStream()));
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					throw new IllegalStateException("Failed to evaluate script [" + script + "]", ex);
 				}
 			}
@@ -366,8 +360,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
 					obtainApplicationContext(), ScriptTemplateConfig.class, true, false);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		} catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException("Expected a single ScriptTemplateConfig bean in the current " +
 					"Servlet web application context or the parent root context: ScriptTemplateConfigurer is " +
 					"the usual implementation. This bean may have any name.", ex);
@@ -394,7 +387,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Override
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+										   HttpServletResponse response) throws Exception {
 
 		try {
 			ScriptEngine engine = getEngine();
@@ -405,8 +398,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			Function<String, String> templateLoader = path -> {
 				try {
 					return getTemplate(path);
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					throw new IllegalStateException(ex);
 				}
 			};
@@ -420,18 +412,15 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				bindings.putAll(model);
 				model.put("renderingContext", context);
 				html = engine.eval(template, bindings);
-			}
-			else if (this.renderObject != null) {
+			} else if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
 				html = ((Invocable) engine).invokeMethod(thiz, this.renderFunction, template, model, context);
-			}
-			else {
+			} else {
 				html = ((Invocable) engine).invokeFunction(this.renderFunction, template, model, context);
 			}
 
 			response.getWriter().write(String.valueOf(html));
-		}
-		catch (ScriptException ex) {
+		} catch (ScriptException ex) {
 			throw new ServletException("Failed to render script template", new StandardScriptEvalException(ex));
 		}
 	}
