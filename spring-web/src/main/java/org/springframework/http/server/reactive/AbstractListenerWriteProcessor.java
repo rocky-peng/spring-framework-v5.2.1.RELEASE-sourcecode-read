@@ -16,17 +16,16 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.logging.Log;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Abstract base class for {@code Processor} implementations that bridge between
@@ -36,16 +35,17 @@ import org.springframework.util.Assert;
  * Servlet 3.1 non-blocking I/O and Undertow XNIO as well for writing WebSocket
  * messages through the Java WebSocket API (JSR-356), Jetty, and Undertow.
  *
+ * @param <T> the type of element signaled to the {@link Subscriber}
  * @author Arjen Poutsma
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
  * @since 5.0
- * @param <T> the type of element signaled to the {@link Subscriber}
  */
 public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, Void> {
 
 	/**
 	 * Special logger for debugging Reactive Streams signals.
+	 *
 	 * @see LogDelegateFactory#getHiddenLog(Class)
 	 * @see AbstractListenerReadPublisher#rsReadLogger
 	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
@@ -55,18 +55,13 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
-
+	private final WriteResultPublisher resultPublisher;
+	private final String logPrefix;
 	@Nullable
 	private Subscription subscription;
-
 	@Nullable
 	private volatile T currentData;
-
 	private volatile boolean subscriberCompleted;
-
-	private final WriteResultPublisher resultPublisher;
-
-	private final String logPrefix;
 
 
 	public AbstractListenerWriteProcessor() {
@@ -75,6 +70,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Create an instance with the given log prefix.
+	 *
 	 * @since 5.1
 	 */
 	public AbstractListenerWriteProcessor(String logPrefix) {
@@ -85,6 +81,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Create an instance with the given log prefix.
+	 *
 	 * @since 5.1
 	 */
 	public String getLogPrefix() {
@@ -201,6 +198,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * <p><strong>Note:</strong> Sub-classes are responsible for releasing any
 	 * data buffer associated with the item, once fully written, if pooled
 	 * buffers apply to the underlying container.
+	 *
 	 * @param data the item to write
 	 * @return whether the current data item was written and another one
 	 * requested ({@code true}), or or otherwise if more writes are required.
@@ -211,6 +209,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * Invoked after the current data has been written and before requesting
 	 * the next item from the upstream, write Publisher.
 	 * <p>The default implementation is a no-op.
+	 *
 	 * @deprecated originally introduced for Undertow to stop write notifications
 	 * when no data is available, but deprecated as of as of 5.0.6 since constant
 	 * switching on every requested item causes a significant slowdown.
@@ -240,6 +239,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * from I/O operations to the underlying server) and cancellation
 	 * to discard in-flight data that was in
 	 * the process of being written when the error took place.
+	 *
 	 * @param data the data to be released
 	 * @since 5.0.11
 	 */
@@ -267,8 +267,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			discardCurrentData();
 			writingComplete();
 			this.resultPublisher.publishComplete();
-		}
-		else {
+		} else {
 			this.state.get().onComplete(this);
 		}
 	}
@@ -317,8 +316,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
 					subscription.request(1);
-				}
-				else {
+				} else {
 					super.onSubscribe(processor, subscription);
 				}
 			}
@@ -336,12 +334,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				if (processor.isDataEmpty(data)) {
 					Assert.state(processor.subscription != null, "No subscription");
 					processor.subscription.request(1);
-				}
-				else {
+				} else {
 					processor.dataReceived(data);
 					processor.changeStateToReceived(this);
 				}
 			}
+
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				processor.changeStateToComplete(this);
@@ -361,19 +359,16 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 								processor.currentData = null;
 								if (processor.subscriberCompleted) {
 									processor.changeStateToComplete(REQUESTED);
-								}
-								else {
+								} else {
 									processor.writingPaused();
 									Assert.state(processor.subscription != null, "No subscription");
 									processor.subscription.request(1);
 								}
 							}
-						}
-						else {
+						} else {
 							processor.changeStateToReceived(WRITING);
 						}
-					}
-					catch (IOException ex) {
+					} catch (IOException ex) {
 						processor.writingFailed(ex);
 					}
 				}
@@ -405,10 +400,12 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 			public <T> void onNext(AbstractListenerWriteProcessor<T> processor, T data) {
 				// ignore
 			}
+
 			@Override
 			public <T> void onError(AbstractListenerWriteProcessor<T> processor, Throwable ex) {
 				// ignore
 			}
+
 			@Override
 			public <T> void onComplete(AbstractListenerWriteProcessor<T> processor) {
 				// ignore
@@ -430,8 +427,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 				processor.discardCurrentData();
 				processor.writingComplete();
 				processor.resultPublisher.publishError(ex);
-			}
-			else {
+			} else {
 				processor.state.get().onError(processor, ex);
 			}
 		}

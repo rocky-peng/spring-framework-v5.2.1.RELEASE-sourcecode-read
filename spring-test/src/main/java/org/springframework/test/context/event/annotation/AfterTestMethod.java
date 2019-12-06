@@ -16,13 +16,13 @@
 
 package org.springframework.test.context.event.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.event.AfterTestMethodEvent;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.METHOD;
@@ -52,11 +52,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Frank Scheffler
  * @author Sam Brannen
- * @since 5.2
  * @see AfterTestMethodEvent
+ * @since 5.2
  */
 @Retention(RUNTIME)
-@Target({ METHOD, ANNOTATION_TYPE })
+@Target({METHOD, ANNOTATION_TYPE})
 @Documented
 @EventListener(AfterTestMethodEvent.class)
 public @interface AfterTestMethod {

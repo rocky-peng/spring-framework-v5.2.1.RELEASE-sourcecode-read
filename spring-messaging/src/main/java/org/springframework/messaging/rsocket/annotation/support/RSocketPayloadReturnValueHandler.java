@@ -16,13 +16,7 @@
 
 package org.springframework.messaging.rsocket.annotation.support;
 
-import java.util.List;
-
 import io.rsocket.Payload;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Encoder;
@@ -32,6 +26,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
 import org.springframework.messaging.rsocket.PayloadUtils;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+
+import java.util.List;
 
 /**
  * Extension of {@link AbstractEncoderMethodReturnValueHandler} that

@@ -16,29 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -59,6 +38,26 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful
@@ -76,6 +75,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that always matches.
+	 *
 	 * @return a predicate that always matches
 	 */
 	public static RequestPredicate all() {
@@ -85,6 +85,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's
 	 * HTTP method is equal to the given method.
+	 *
 	 * @param httpMethod the HTTP method to match against
 	 * @return a predicate that tests against the given HTTP method
 	 */
@@ -95,6 +96,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's
 	 * HTTP method is equal to one the of the given methods.
+	 *
 	 * @param httpMethods the HTTP methods to match against
 	 * @return a predicate that tests against the given HTTP methods
 	 * @since 5.1
@@ -106,6 +108,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that tests the request path
 	 * against the given path pattern.
+	 *
 	 * @param pattern the pattern to match to
 	 * @return a predicate that tests against the given path pattern
 	 */
@@ -122,6 +125,7 @@ public abstract class RequestPredicates {
 	 * from pattern Strings using the given {@link PathPatternParser}.
 	 * <p>This method can be used to specify a non-default, customized
 	 * {@code PathPatternParser} when resolving path patterns.
+	 *
 	 * @param patternParser the parser used to parse patterns given to the returned function
 	 * @return a function that resolves a pattern String into a path-matching
 	 * {@code RequestPredicates} instance
@@ -134,6 +138,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that tests the request's headers
 	 * against the given headers predicate.
+	 *
 	 * @param headersPredicate a predicate that tests against the request headers
 	 * @return a predicate that tests against the given header predicate
 	 */
@@ -145,6 +150,7 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests if the request's
 	 * {@linkplain ServerRequest.Headers#contentType() content type} is
 	 * {@linkplain MediaType#includes(MediaType) included} by any of the given media types.
+	 *
 	 * @param mediaTypes the media types to match the request's content type against
 	 * @return a predicate that tests the request's content type against the given media types
 	 */
@@ -157,6 +163,7 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests if the request's
 	 * {@linkplain ServerRequest.Headers#accept() accept} header is
 	 * {@linkplain MediaType#isCompatibleWith(MediaType) compatible} with any of the given media types.
+	 *
 	 * @param mediaTypes the media types to match the request's accept header against
 	 * @return a predicate that tests the request's accept header against the given media types
 	 */
@@ -168,6 +175,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code GET}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is GET and if the given pattern
 	 * matches against the request path
@@ -179,6 +187,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code HEAD}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is HEAD and if the given pattern
 	 * matches against the request path
@@ -190,6 +199,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code POST}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is POST and if the given pattern
 	 * matches against the request path
@@ -201,6 +211,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PUT}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is PUT and if the given pattern
 	 * matches against the request path
@@ -212,6 +223,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code PATCH}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is PATCH and if the given pattern
 	 * matches against the request path
@@ -223,6 +235,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code DELETE}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is DELETE and if the given pattern
 	 * matches against the request path
@@ -234,6 +247,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if request's HTTP method is {@code OPTIONS}
 	 * and the given {@code pattern} matches against the request path.
+	 *
 	 * @param pattern the path pattern to match against
 	 * @return a predicate that matches if the request method is OPTIONS and if the given pattern
 	 * matches against the request path
@@ -244,6 +258,7 @@ public abstract class RequestPredicates {
 
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
+	 *
 	 * @param extension the path extension to match against, ignoring case
 	 * @return a predicate that matches if the request's path has the given file extension
 	 */
@@ -255,6 +270,7 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's path matches the given
 	 * predicate.
+	 *
 	 * @param extensionPredicate the predicate to test against the request path extension
 	 * @return a predicate that matches if the given predicate matches against the request's path
 	 * file extension
@@ -266,11 +282,12 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that matches if the request's query parameter of the given name
 	 * has the given value.
-	 * @param name the name of the query parameter to test against
+	 *
+	 * @param name  the name of the query parameter to test against
 	 * @param value the value of the query parameter to test against
 	 * @return a predicate that matches if the query parameter has the given value
-	 * @since 5.0.7
 	 * @see ServerRequest#queryParam(String)
+	 * @since 5.0.7
 	 */
 	public static RequestPredicate queryParam(String name, String value) {
 		return new QueryParamPredicate(name, value);
@@ -279,7 +296,8 @@ public abstract class RequestPredicates {
 	/**
 	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
 	 * against the given predicate.
-	 * @param name the name of the query parameter to test against
+	 *
+	 * @param name      the name of the query parameter to test against
 	 * @param predicate predicate to test against the query parameter value
 	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam(String)
@@ -302,14 +320,13 @@ public abstract class RequestPredicates {
 	}
 
 	private static Map<String, String> mergePathVariables(Map<String, String> oldVariables,
-			Map<String, String> newVariables) {
+														  Map<String, String> newVariables) {
 
 		if (!newVariables.isEmpty()) {
 			Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
 			mergedVariables.putAll(newVariables);
 			return mergedVariables;
-		}
-		else {
+		} else {
 			return oldVariables;
 		}
 	}
@@ -317,8 +334,7 @@ public abstract class RequestPredicates {
 	private static PathPattern mergePatterns(@Nullable PathPattern oldPattern, PathPattern newPattern) {
 		if (oldPattern != null) {
 			return oldPattern.combine(newPattern);
-		}
-		else {
+		} else {
 			return newPattern;
 		}
 
@@ -332,6 +348,7 @@ public abstract class RequestPredicates {
 
 		/**
 		 * Receive notification of an HTTP method predicate.
+		 *
 		 * @param methods the HTTP methods that make up the predicate
 		 * @see RequestPredicates#method(HttpMethod)
 		 */
@@ -339,6 +356,7 @@ public abstract class RequestPredicates {
 
 		/**
 		 * Receive notification of an path predicate.
+		 *
 		 * @param pattern the path pattern that makes up the predicate
 		 * @see RequestPredicates#path(String)
 		 */
@@ -346,6 +364,7 @@ public abstract class RequestPredicates {
 
 		/**
 		 * Receive notification of an path extension predicate.
+		 *
 		 * @param extension the path extension that makes up the predicate
 		 * @see RequestPredicates#pathExtension(String)
 		 */
@@ -353,7 +372,8 @@ public abstract class RequestPredicates {
 
 		/**
 		 * Receive notification of an HTTP header predicate.
-		 * @param name the name of the HTTP header to check
+		 *
+		 * @param name  the name of the HTTP header to check
 		 * @param value the desired value of the HTTP header
 		 * @see RequestPredicates#headers(Predicate)
 		 * @see RequestPredicates#contentType(MediaType...)
@@ -363,7 +383,8 @@ public abstract class RequestPredicates {
 
 		/**
 		 * Receive notification of a query parameter predicate.
-		 * @param name the name of the query parameter
+		 *
+		 * @param name  the name of the query parameter
 		 * @param value the desired value of the parameter
 		 * @see RequestPredicates#queryParam(String, String)
 		 */
@@ -373,6 +394,7 @@ public abstract class RequestPredicates {
 		 * Receive first notification of a logical AND predicate.
 		 * The first subsequent notification will contain the left-hand side of the AND-predicate;
 		 * followed by {@link #and()}, followed by the right-hand side, followed by {@link #endAnd()}.
+		 *
 		 * @see RequestPredicate#and(RequestPredicate)
 		 */
 		void startAnd();
@@ -380,12 +402,14 @@ public abstract class RequestPredicates {
 		/**
 		 * Receive "middle" notification of a logical AND predicate.
 		 * The following notification contains the right-hand side, followed by {@link #endAnd()}.
+		 *
 		 * @see RequestPredicate#and(RequestPredicate)
 		 */
 		void and();
 
 		/**
 		 * Receive last notification of a logical AND predicate.
+		 *
 		 * @see RequestPredicate#and(RequestPredicate)
 		 */
 		void endAnd();
@@ -394,6 +418,7 @@ public abstract class RequestPredicates {
 		 * Receive first notification of a logical OR predicate.
 		 * The first subsequent notification will contain the left-hand side of the OR-predicate;
 		 * the second notification contains the right-hand side, followed by {@link #endOr()}.
+		 *
 		 * @see RequestPredicate#or(RequestPredicate)
 		 */
 		void startOr();
@@ -401,12 +426,14 @@ public abstract class RequestPredicates {
 		/**
 		 * Receive "middle" notification of a logical OR predicate.
 		 * The following notification contains the right-hand side, followed by {@link #endOr()}.
+		 *
 		 * @see RequestPredicate#or(RequestPredicate)
 		 */
 		void or();
 
 		/**
 		 * Receive last notification of a logical OR predicate.
+		 *
 		 * @see RequestPredicate#or(RequestPredicate)
 		 */
 		void endOr();
@@ -415,12 +442,14 @@ public abstract class RequestPredicates {
 		 * Receive first notification of a negated predicate.
 		 * The first subsequent notification will contain the negated predicated, followed
 		 * by {@link #endNegate()}.
+		 *
 		 * @see RequestPredicate#negate()
 		 */
 		void startNegate();
 
 		/**
 		 * Receive last notification of a negated predicate.
+		 *
 		 * @see RequestPredicate#negate()
 		 */
 		void endNegate();
@@ -463,8 +492,7 @@ public abstract class RequestPredicates {
 		public String toString() {
 			if (this.httpMethods.size() == 1) {
 				return this.httpMethods.iterator().next().toString();
-			}
-			else {
+			} else {
 				return this.httpMethods.toString();
 			}
 		}
@@ -480,6 +508,18 @@ public abstract class RequestPredicates {
 			this.pattern = pattern;
 		}
 
+		private static void mergeAttributes(ServerRequest request, Map<String, String> variables,
+											PathPattern pattern) {
+			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
+			request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+					Collections.unmodifiableMap(pathVariables));
+
+			pattern = mergePatterns(
+					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+					pattern);
+			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
+		}
+
 		@Override
 		public boolean test(ServerRequest request) {
 			PathContainer pathContainer = request.pathContainer();
@@ -488,22 +528,9 @@ public abstract class RequestPredicates {
 			if (info != null) {
 				mergeAttributes(request, info.getUriVariables(), this.pattern);
 				return true;
-			}
-			else {
+			} else {
 				return false;
 			}
-		}
-
-		private static void mergeAttributes(ServerRequest request, Map<String, String> variables,
-				PathPattern pattern) {
-			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
-			request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(pathVariables));
-
-			pattern = mergePatterns(
-					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
-					pattern);
-			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
 		}
 
 		@Override
@@ -606,8 +633,7 @@ public abstract class RequestPredicates {
 			List<MediaType> acceptedMediaTypes = headers.accept();
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
-			}
-			else {
+			} else {
 				MediaType.sortBySpecificityAndQuality(acceptedMediaTypes);
 			}
 			return acceptedMediaTypes;
@@ -834,8 +860,7 @@ public abstract class RequestPredicates {
 
 			if (this.left.test(request)) {
 				return true;
-			}
-			else {
+			} else {
 				restoreAttributes(request, oldAttributes);
 				if (this.right.test(request)) {
 					return true;
@@ -850,8 +875,7 @@ public abstract class RequestPredicates {
 			Optional<ServerRequest> leftResult = this.left.nest(request);
 			if (leftResult.isPresent()) {
 				return leftResult;
-			}
-			else {
+			} else {
 				return this.right.nest(request);
 			}
 		}
@@ -882,14 +906,14 @@ public abstract class RequestPredicates {
 		private final Map<String, Object> attributes;
 
 		public SubPathServerRequestWrapper(ServerRequest request,
-				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
+										   PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
 			this.request = request;
 			this.pathContainer = new SubPathContainer(info.getPathRemaining());
 			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
 		}
 
 		private static Map<String, Object> mergeAttributes(ServerRequest request,
-		Map<String, String> pathVariables, PathPattern pattern) {
+														   Map<String, String> pathVariables, PathPattern pattern) {
 			Map<String, Object> result = new ConcurrentHashMap<>(request.attributes());
 
 			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
@@ -1032,7 +1056,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public String toString() {
-			return method() + " " +  path();
+			return method() + " " + path();
 		}
 
 		private static class SubPathContainer implements PathContainer {

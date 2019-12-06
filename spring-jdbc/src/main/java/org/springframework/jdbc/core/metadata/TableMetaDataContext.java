@@ -16,19 +16,8 @@
 
 package org.springframework.jdbc.core.metadata;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -36,6 +25,15 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class to manage context meta-data used for the configuration
@@ -78,14 +76,6 @@ public class TableMetaDataContext {
 	// Are we using generated key columns
 	private boolean generatedKeyColumnsUsed = false;
 
-
-	/**
-	 * Set the name of the table for this context.
-	 */
-	public void setTableName(@Nullable String tableName) {
-		this.tableName = tableName;
-	}
-
 	/**
 	 * Get the name of the table for this context.
 	 */
@@ -95,10 +85,10 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Set the name of the catalog for this context.
+	 * Set the name of the table for this context.
 	 */
-	public void setCatalogName(@Nullable String catalogName) {
-		this.catalogName = catalogName;
+	public void setTableName(@Nullable String tableName) {
+		this.tableName = tableName;
 	}
 
 	/**
@@ -110,10 +100,10 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Set the name of the schema for this context.
+	 * Set the name of the catalog for this context.
 	 */
-	public void setSchemaName(@Nullable String schemaName) {
-		this.schemaName = schemaName;
+	public void setCatalogName(@Nullable String catalogName) {
+		this.catalogName = catalogName;
 	}
 
 	/**
@@ -125,10 +115,10 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Specify whether we should access table column meta-data.
+	 * Set the name of the schema for this context.
 	 */
-	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
-		this.accessTableColumnMetaData = accessTableColumnMetaData;
+	public void setSchemaName(@Nullable String schemaName) {
+		this.schemaName = schemaName;
 	}
 
 	/**
@@ -138,12 +128,11 @@ public class TableMetaDataContext {
 		return this.accessTableColumnMetaData;
 	}
 
-
 	/**
-	 * Specify whether we should override default for accessing synonyms.
+	 * Specify whether we should access table column meta-data.
 	 */
-	public void setOverrideIncludeSynonymsDefault(boolean override) {
-		this.overrideIncludeSynonymsDefault = override;
+	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
+		this.accessTableColumnMetaData = accessTableColumnMetaData;
 	}
 
 	/**
@@ -151,6 +140,13 @@ public class TableMetaDataContext {
 	 */
 	public boolean isOverrideIncludeSynonymsDefault() {
 		return this.overrideIncludeSynonymsDefault;
+	}
+
+	/**
+	 * Specify whether we should override default for accessing synonyms.
+	 */
+	public void setOverrideIncludeSynonymsDefault(boolean override) {
+		this.overrideIncludeSynonymsDefault = override;
 	}
 
 	/**
@@ -163,8 +159,9 @@ public class TableMetaDataContext {
 
 	/**
 	 * Process the current meta-data with the provided configuration options.
-	 * @param dataSource the DataSource being used
-	 * @param declaredColumns any columns that are declared
+	 *
+	 * @param dataSource        the DataSource being used
+	 * @param declaredColumns   any columns that are declared
 	 * @param generatedKeyNames name of generated keys
 	 */
 	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
@@ -179,7 +176,8 @@ public class TableMetaDataContext {
 
 	/**
 	 * Compare columns created from meta-data with declared columns and return a reconciled list.
-	 * @param declaredColumns declared column names
+	 *
+	 * @param declaredColumns   declared column names
 	 * @param generatedKeyNames names of generated key columns
 	 */
 	protected List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
@@ -204,6 +202,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Match the provided column names and values with the list of columns used.
+	 *
 	 * @param parameterSource the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
@@ -215,23 +214,19 @@ public class TableMetaDataContext {
 		for (String column : this.tableColumns) {
 			if (parameterSource.hasValue(column)) {
 				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
-			}
-			else {
+			} else {
 				String lowerCaseName = column.toLowerCase();
 				if (parameterSource.hasValue(lowerCaseName)) {
 					values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
-				}
-				else {
+				} else {
 					String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(column);
 					if (parameterSource.hasValue(propertyName)) {
 						values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
-					}
-					else {
+					} else {
 						if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
 							values.add(SqlParameterSourceUtils.getTypedValue(
 									parameterSource, caseInsensitiveParameterNames.get(lowerCaseName)));
-						}
-						else {
+						} else {
 							values.add(null);
 						}
 					}
@@ -243,6 +238,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Match the provided column names and values with the list of columns used.
+	 *
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
@@ -268,6 +264,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Build the insert string based on configuration and meta-data information.
+	 *
 	 * @return the insert string to be used
 	 */
 	public String createInsertString(String... generatedKeyNames) {
@@ -300,8 +297,7 @@ public class TableMetaDataContext {
 					logger.debug("Unable to locate non-key columns for table '" +
 							getTableName() + "' so an empty insert statement is generated");
 				}
-			}
-			else {
+			} else {
 				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +
 						getTableName() + "' so an insert statement can't be generated");
 			}
@@ -314,6 +310,7 @@ public class TableMetaDataContext {
 
 	/**
 	 * Build the array of {@link java.sql.Types} based on configuration and meta-data information.
+	 *
 	 * @return the array of types to be used
 	 */
 	public int[] createInsertTypes() {
@@ -327,13 +324,11 @@ public class TableMetaDataContext {
 		for (String column : getTableColumns()) {
 			if (column == null) {
 				types[typeIndx] = SqlTypeValue.TYPE_UNKNOWN;
-			}
-			else {
+			} else {
 				TableParameterMetaData tpmd = parameterMap.get(column.toUpperCase());
 				if (tpmd != null) {
 					types[typeIndx] = tpmd.getSqlType();
-				}
-				else {
+				} else {
 					types[typeIndx] = SqlTypeValue.TYPE_UNKNOWN;
 				}
 			}
@@ -364,6 +359,7 @@ public class TableMetaDataContext {
 	 * Does this database support a simple query to retrieve generated keys
 	 * when the JDBC 3.0 feature is not supported:
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 *
 	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
 	 */
 	@Deprecated

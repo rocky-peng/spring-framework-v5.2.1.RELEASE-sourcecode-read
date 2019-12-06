@@ -16,17 +16,16 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 
 /**
  * Utility methods for working with {@link TestConstructor @TestConstructor}.
@@ -34,8 +33,8 @@ import org.springframework.test.context.TestConstructor.AutowireMode;
  * <p>Primarily intended for use within the framework.
  *
  * @author Sam Brannen
- * @since 5.2
  * @see TestConstructor
+ * @since 5.2
  */
 public abstract class TestConstructorUtils {
 
@@ -53,7 +52,7 @@ public abstract class TestConstructorUtils {
 	 * if the executable is a constructor.
 	 *
 	 * @param executable an executable for the test class
-	 * @param testClass the test class
+	 * @param testClass  the test class
 	 * @return {@code true} if the executable is an autowirable constructor
 	 * @see #isAutowirableConstructor(Constructor, Class)
 	 */
@@ -81,7 +80,7 @@ public abstract class TestConstructorUtils {
 	 * </ol>
 	 *
 	 * @param constructor a constructor for the test class
-	 * @param testClass the test class
+	 * @param testClass   the test class
 	 * @return {@code true} if the constructor is autowirable
 	 * @see #isAutowirableConstructor(Executable, Class)
 	 */
@@ -97,18 +96,16 @@ public abstract class TestConstructorUtils {
 		TestConstructor testConstructor = AnnotatedElementUtils.findMergedAnnotation(testClass, TestConstructor.class);
 		if (testConstructor != null) {
 			autowireMode = testConstructor.autowireMode();
-		}
-		else {
+		} else {
 			// Custom global default?
 			String value = SpringProperties.getProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME);
 			if (value != null) {
 				try {
 					autowireMode = AutowireMode.valueOf(value.trim().toUpperCase());
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Failed to parse autowire mode '%s' for property '%s': %s", value,
-							TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, ex.getMessage()));
+								TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, ex.getMessage()));
 					}
 				}
 			}

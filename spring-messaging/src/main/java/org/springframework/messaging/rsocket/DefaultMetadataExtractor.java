@@ -15,6 +15,20 @@
  */
 package org.springframework.messaging.rsocket;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.rsocket.Payload;
+import io.rsocket.metadata.CompositeMetadata;
+import io.rsocket.metadata.RoutingMetadata;
+import io.rsocket.metadata.WellKnownMimeType;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,21 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.rsocket.Payload;
-import io.rsocket.metadata.CompositeMetadata;
-import io.rsocket.metadata.RoutingMetadata;
-import io.rsocket.metadata.WellKnownMimeType;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType;
 
 /**
  * Default {@link MetadataExtractor} implementation that relies on
@@ -114,8 +113,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 			for (CompositeMetadata.Entry entry : new CompositeMetadata(payload.metadata(), false)) {
 				extractEntry(entry.getContent(), entry.getMimeType(), result);
 			}
-		}
-		else {
+		} else {
 			extractEntry(payload.metadata().slice(), metadataMimeType.toString(), result);
 		}
 		return result;
@@ -156,7 +154,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 
 
 		EntryExtractor(Decoder<T> decoder, MimeType mimeType, ResolvableType targetType,
-				BiConsumer<T, Map<String, Object>> accumulator) {
+					   BiConsumer<T, Map<String, Object>> accumulator) {
 
 			this.decoder = decoder;
 			this.mimeType = mimeType;

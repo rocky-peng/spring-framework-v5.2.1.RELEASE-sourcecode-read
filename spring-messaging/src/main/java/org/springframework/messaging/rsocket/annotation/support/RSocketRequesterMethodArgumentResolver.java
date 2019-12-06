@@ -17,13 +17,12 @@
 package org.springframework.messaging.rsocket.annotation.support;
 
 import io.rsocket.RSocket;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodArgumentResolver;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
 
 /**
  * Resolves arguments of type {@link RSocket} that can be used for making
@@ -58,11 +57,9 @@ public class RSocketRequesterMethodArgumentResolver implements HandlerMethodArgu
 		Class<?> type = parameter.getParameterType();
 		if (RSocketRequester.class.equals(type)) {
 			return Mono.just(requester);
-		}
-		else if (RSocket.class.isAssignableFrom(type)) {
+		} else if (RSocket.class.isAssignableFrom(type)) {
 			return Mono.just(requester.rsocket());
-		}
-		else {
+		} else {
 			return Mono.error(new IllegalArgumentException("Unexpected parameter type: " + parameter));
 		}
 	}

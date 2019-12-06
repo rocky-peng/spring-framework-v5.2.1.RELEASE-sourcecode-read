@@ -16,17 +16,16 @@
 
 package org.springframework.http.codec.json;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import reactor.core.publisher.Flux;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import reactor.core.publisher.Flux;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 2.9.
@@ -34,12 +33,12 @@ import org.springframework.util.MimeType;
  * before serialization for performance reason.
  *
  * @author Sebastien Deleuze
- * @since 5.0
  * @see Jackson2SmileDecoder
+ * @since 5.0
  */
 public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 
-	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
+	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[]{
 			new MimeType("application", "x-jackson-smile"),
 			new MimeType("application", "*+x-jackson-smile")};
 

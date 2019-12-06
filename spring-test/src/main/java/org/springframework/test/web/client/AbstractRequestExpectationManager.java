@@ -16,6 +16,12 @@
 
 package org.springframework.test.web.client;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
@@ -27,12 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Base class for {@code RequestExpectationManager} implementations responsible
@@ -91,16 +91,13 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				ClientHttpResponse response = validateRequestInternal(request);
 				if (response != null) {
 					return response;
-				}
-				else {
+				} else {
 					expectation = matchRequest(request);
 				}
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				this.requestFailures.put(request, ex);
 				throw ex;
-			}
-			finally {
+			} finally {
 				this.requests.add(request);
 			}
 		}
@@ -117,6 +114,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	/**
 	 * Subclasses must implement the actual validation of the request
 	 * matching to declared expectations.
+	 *
 	 * @deprecated as of 5.0.3, subclasses should implement {@link #matchRequest(ClientHttpRequest)}
 	 * instead and return only the matched expectation, leaving the call to create the response
 	 * as a separate step (to be invoked by this class).
@@ -132,6 +130,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	 * {@link #validateRequestInternal(ClientHttpRequest)} in order to match the
 	 * request to an expectation, leaving the call to create the response as a separate step
 	 * (to be invoked by this class).
+	 *
 	 * @param request the current request
 	 * @return the matched expectation with its request count updated via
 	 * {@link RequestExpectation#incrementAndValidate()}.
@@ -140,7 +139,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	protected RequestExpectation matchRequest(ClientHttpRequest request) throws IOException {
 		throw new UnsupportedOperationException(
 				"It looks like neither the deprecated \"validateRequestInternal\"" +
-				"nor its replacement (this method) are implemented.");
+						"nor its replacement (this method) are implemented.");
 	}
 
 	@Override
@@ -177,8 +176,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			for (ClientHttpRequest request : this.requests) {
 				sb.append(request.toString()).append("\n");
 			}
-		}
-		else {
+		} else {
 			sb.append(".\n");
 		}
 		return sb.toString();
@@ -226,8 +224,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				try {
 					expectation.match(request);
 					return expectation;
-				}
-				catch (AssertionError error) {
+				} catch (AssertionError error) {
 					// We're looking to find a match or return null..
 				}
 			}
@@ -247,14 +244,14 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		private void updateInternal(RequestExpectation expectation) {
 			if (expectation.hasRemainingCount()) {
 				this.expectations.add(expectation);
-			}
-			else {
+			} else {
 				this.expectations.remove(expectation);
 			}
 		}
 
 		/**
 		 * Add expectations to this group.
+		 *
 		 * @deprecated as of 5.0.3, if favor of {@link #addAllExpectations}
 		 */
 		@Deprecated

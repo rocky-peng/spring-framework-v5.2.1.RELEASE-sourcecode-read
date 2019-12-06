@@ -16,12 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -34,6 +28,12 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A logical disjunction (' || ') request condition to match a request's 'Accept' header
@@ -66,6 +66,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	/**
 	 * Creates a new instance from "produces" expressions. If 0 expressions
 	 * are provided in total, this condition will match to any request.
+	 *
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
 	 */
 	public ProducesRequestCondition(String... produces) {
@@ -77,8 +78,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * expressions where the header name is not 'Accept' or have no header value
 	 * defined are ignored. If 0 expressions are provided in total, this condition
 	 * will match to any request.
+	 *
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
-	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
+	 * @param headers  expressions with syntax defined by {@link RequestMapping#headers()}
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers) {
 		this(produces, headers, null);
@@ -87,8 +89,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	/**
 	 * Same as {@link #ProducesRequestCondition(String[], String[])} but also
 	 * accepting a {@link ContentNegotiationManager}.
+	 *
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
-	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
+	 * @param headers  expressions with syntax defined by {@link RequestMapping#headers()}
 	 * @param resolver used to determine requested content type
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
@@ -106,6 +109,16 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		this.contentTypeResolver = other.contentTypeResolver;
 	}
 
+	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 *
+	 * @param exchange the current exchange
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(MEDIA_TYPES_ATTRIBUTE);
+	}
 
 	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>();
@@ -180,6 +193,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * request 'Content-Type' header and returns an instance that is guaranteed
 	 * to contain matching expressions only. The match is performed via
 	 * {@link MediaType#isCompatibleWith(MediaType)}.
+	 *
 	 * @param exchange the current exchange
 	 * @return the same instance if there are no expressions;
 	 * or a new condition with matching expressions;
@@ -197,14 +211,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		List<ProduceMediaTypeExpression> result = getMatchingExpressions(exchange);
 		if (!CollectionUtils.isEmpty(result)) {
 			return new ProducesRequestCondition(result, this);
-		}
-		else {
+		} else {
 			try {
 				if (MediaType.ALL.isPresentIn(getAcceptedMediaTypes(exchange))) {
 					return EMPTY_CONDITION;
 				}
-			}
-			catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
+			} catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
 				// Ignore
 			}
 		}
@@ -259,8 +271,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 				}
 			}
 			return 0;
-		}
-		catch (NotAcceptableStatusException ex) {
+		} catch (NotAcceptableStatusException ex) {
 			// should never happen
 			throw new IllegalStateException("Cannot compare without having any requested media types", ex);
 		}
@@ -296,13 +307,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	private int compareMatchingMediaTypes(ProducesRequestCondition condition1, int index1,
-			ProducesRequestCondition condition2, int index2) {
+										  ProducesRequestCondition condition2, int index2) {
 
 		int result = 0;
 		if (index1 != index2) {
 			result = index2 - index1;
-		}
-		else if (index1 != -1) {
+		} else if (index1 != -1) {
 			ProduceMediaTypeExpression expr1 = condition1.getExpressionsToCompare().get(index1);
 			ProduceMediaTypeExpression expr2 = condition2.getExpressionsToCompare().get(index2);
 			result = expr1.compareTo(expr2);
@@ -316,20 +326,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * with a {@value MediaType#ALL_VALUE} expression.
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
-		return (this.expressions.isEmpty() ? this.mediaTypeAllList  : this.expressions);
+		return (this.expressions.isEmpty() ? this.mediaTypeAllList : this.expressions);
 	}
-
-
-	/**
-	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
-	 * requested media types.
-	 * @param exchange the current exchange
-	 * @since 5.2
-	 */
-	public static void clearMediaTypesAttribute(ServerWebExchange exchange) {
-		exchange.getAttributes().remove(MEDIA_TYPES_ATTRIBUTE);
-	}
-
 
 	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header.

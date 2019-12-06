@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.util.Assert;
 
 /**
  * Assist with configuration for handler method argument resolvers.
@@ -36,6 +36,7 @@ public class ArgumentResolverConfigurer {
 
 	/**
 	 * Configure resolvers for custom handler method arguments.
+	 *
 	 * @param resolver the resolvers to add
 	 */
 	public void addCustomResolver(HandlerMethodArgumentResolver... resolver) {

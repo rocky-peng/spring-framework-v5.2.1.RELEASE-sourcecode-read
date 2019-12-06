@@ -16,11 +16,10 @@
 
 package org.springframework.messaging.handler.annotation.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodArgumentResolver;
+import reactor.core.publisher.Mono;
 
 /**
  * No-op resolver for method arguments of type {@link kotlin.coroutines.Continuation}.

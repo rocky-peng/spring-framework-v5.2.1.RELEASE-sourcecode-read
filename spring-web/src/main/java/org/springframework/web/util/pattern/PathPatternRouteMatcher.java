@@ -16,14 +16,14 @@
 
 package org.springframework.web.util.pattern;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.RouteMatcher;
+
+import java.util.Comparator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@code RouteMatcher} built on {@link PathPatternParser} that uses

@@ -16,18 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.function.Supplier;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -44,6 +32,17 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.function.Supplier;
 
 /**
  * Default implementation of {@link ClientResponse}.
@@ -68,7 +67,7 @@ class DefaultClientResponse implements ClientResponse {
 
 
 	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies,
-			String logPrefix, String requestDescription, Supplier<HttpRequest> requestSupplier) {
+								 String logPrefix, String requestDescription, Supplier<HttpRequest> requestSupplier) {
 
 		this.response = response;
 		this.strategies = strategies;
@@ -126,11 +125,9 @@ class DefaultClientResponse implements ClientResponse {
 		String description = "Body from " + this.requestDescription + " [DefaultClientResponse]";
 		if (result instanceof Mono) {
 			return (T) ((Mono<?>) result).checkpoint(description);
-		}
-		else if (result instanceof Flux) {
+		} else if (result instanceof Flux) {
 			return (T) ((Flux<?>) result).checkpoint(description);
-		}
-		else {
+		} else {
 			return result;
 		}
 	}
@@ -213,8 +210,7 @@ class DefaultClientResponse implements ClientResponse {
 								bodyBytes,
 								charset,
 								request);
-					}
-					else {
+					} else {
 						return new UnknownHttpStatusCodeException(
 								statusCode,
 								headers().asHttpHeaders(),

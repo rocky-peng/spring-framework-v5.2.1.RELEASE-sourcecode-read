@@ -50,15 +50,8 @@ package org.springframework.test.web.servlet;
 public interface ResultMatcher {
 
 	/**
-	 * Assert the result of an executed request.
-	 * @param result the result of the executed request
-	 * @throws Exception if a failure occurs
-	 */
-	void match(MvcResult result) throws Exception;
-
-
-	/**
 	 * Static method for matching with an array of result matchers.
+	 *
 	 * @param matchers the matchers
 	 * @since 5.1
 	 */
@@ -69,5 +62,13 @@ public interface ResultMatcher {
 			}
 		};
 	}
+
+	/**
+	 * Assert the result of an executed request.
+	 *
+	 * @param result the result of the executed request
+	 * @throws Exception if a failure occurs
+	 */
+	void match(MvcResult result) throws Exception;
 
 }

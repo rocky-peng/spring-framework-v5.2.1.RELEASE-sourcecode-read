@@ -16,16 +16,9 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ResolvableType;
@@ -37,6 +30,12 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link RSocketRequester}.
@@ -76,6 +75,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		this.emptyDataBuffer = this.strategies.dataBufferFactory().wrap(new byte[0]);
 	}
 
+	private static boolean isVoid(ResolvableType elementType) {
+		return (Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve()));
+	}
 
 	@Override
 	public RSocket rsocket() {
@@ -100,11 +102,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	@Override
 	public RequestSpec metadata(Object metadata, @Nullable MimeType mimeType) {
 		return new DefaultRequestSpec(metadata, mimeType);
-	}
-
-
-	private static boolean isVoid(ResolvableType elementType) {
-		return (Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve()));
 	}
 
 	private DataBufferFactory bufferFactory() {
@@ -183,11 +180,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			Publisher<?> publisher;
 			if (input instanceof Publisher) {
 				publisher = (Publisher<?>) input;
-			}
-			else if (adapter != null) {
+			} else if (adapter != null) {
 				publisher = adapter.toPublisher(input);
-			}
-			else {
+			} else {
 				this.payloadMono = Mono
 						.fromCallable(() -> encodeData(input, ResolvableType.forInstance(input), null))
 						.map(this::firstPayload)
@@ -223,8 +218,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 						if (data != null) {
 							return Mono.fromCallable(() -> firstPayload(data))
 									.concatWith(inner.skip(1).map(PayloadUtils::createPayload));
-						}
-						else {
+						} else {
 							return inner.map(PayloadUtils::createPayload);
 						}
 					})
@@ -246,8 +240,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			DataBuffer metadata;
 			try {
 				metadata = this.metadataEncoder.encode();
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				DataBufferUtils.release(data);
 				throw ex;
 			}

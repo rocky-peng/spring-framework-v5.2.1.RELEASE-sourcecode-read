@@ -16,13 +16,9 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import io.rsocket.Payload;
 import io.rsocket.RSocketFactory.ClientRSocketFactory;
 import io.rsocket.RSocketFactory.ServerRSocketFactory;
-
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
@@ -36,6 +32,9 @@ import org.springframework.util.MimeType;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 /**
  * Access to strategies for use by RSocket requester and responder components.
  *
@@ -45,16 +44,36 @@ import org.springframework.util.SimpleRouteMatcher;
 public interface RSocketStrategies {
 
 	/**
+	 * Create an {@code RSocketStrategies} instance with default settings.
+	 * Equivalent to {@code RSocketStrategies.builder().build()}. See individual
+	 * builder methods for details on default settings.
+	 */
+	static RSocketStrategies create() {
+		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder().build();
+	}
+
+	/**
+	 * Return a builder to prepare a new {@code RSocketStrategies} instance.
+	 * The builder applies default settings, see individual builder methods for
+	 * details.
+	 */
+	static Builder builder() {
+		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder();
+	}
+
+	/**
 	 * Return the configured {@link Builder#encoder(Encoder[]) encoders}.
+	 *
 	 * @see #encoder(ResolvableType, MimeType)
 	 */
 	List<Encoder<?>> encoders();
 
 	/**
 	 * Find a compatible Encoder for the given element type.
+	 *
 	 * @param elementType the element type to match
-	 * @param mimeType the MimeType to match
-	 * @param <T> for casting the Encoder to the expected element type
+	 * @param mimeType    the MimeType to match
+	 * @param <T>         for casting the Encoder to the expected element type
 	 * @return the matching Encoder
 	 * @throws IllegalArgumentException if no matching Encoder is found
 	 */
@@ -70,15 +89,17 @@ public interface RSocketStrategies {
 
 	/**
 	 * Return the configured {@link Builder#decoder(Decoder[]) decoders}.
+	 *
 	 * @see #decoder(ResolvableType, MimeType)
 	 */
 	List<Decoder<?>> decoders();
 
 	/**
 	 * Find a compatible Decoder for the given element type.
+	 *
 	 * @param elementType the element type to match
-	 * @param mimeType the MimeType to match
-	 * @param <T> for casting the Decoder to the expected element type
+	 * @param mimeType    the MimeType to match
+	 * @param <T>         for casting the Decoder to the expected element type
 	 * @return the matching Decoder
 	 * @throws IllegalArgumentException if no matching Decoder is found
 	 */
@@ -120,25 +141,6 @@ public interface RSocketStrategies {
 	 */
 	default Builder mutate() {
 		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder(this);
-	}
-
-
-	/**
-	 * Create an {@code RSocketStrategies} instance with default settings.
-	 * Equivalent to {@code RSocketStrategies.builder().build()}. See individual
-	 * builder methods for details on default settings.
-	 */
-	static RSocketStrategies create() {
-		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder().build();
-	}
-
-	/**
-	 * Return a builder to prepare a new {@code RSocketStrategies} instance.
-	 * The builder applies default settings, see individual builder methods for
-	 * details.
-	 */
-	static Builder builder() {
-		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder();
 	}
 
 

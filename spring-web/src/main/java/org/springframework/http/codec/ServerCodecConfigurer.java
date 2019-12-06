@@ -55,20 +55,19 @@ import org.springframework.core.codec.Encoder;
 public interface ServerCodecConfigurer extends CodecConfigurer {
 
 	/**
+	 * Static factory method for a {@code ServerCodecConfigurer}.
+	 */
+	static ServerCodecConfigurer create() {
+		return CodecConfigurerFactory.create(ServerCodecConfigurer.class);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>On the server side, built-in default also include customizations
 	 * related to the encoder for SSE.
 	 */
 	@Override
 	ServerDefaultCodecs defaultCodecs();
-
-
-	/**
-	 * Static factory method for a {@code ServerCodecConfigurer}.
-	 */
-	static ServerCodecConfigurer create() {
-		return CodecConfigurerFactory.create(ServerCodecConfigurer.class);
-	}
 
 
 	/**
@@ -85,6 +84,7 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 		 * MultipartHttpMessageReader} created with an instance of
 		 * {@link org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
 		 * SynchronossPartHttpMessageReader}.
+		 *
 		 * @param reader the message reader to use for multipart requests.
 		 * @since 5.1.11
 		 */

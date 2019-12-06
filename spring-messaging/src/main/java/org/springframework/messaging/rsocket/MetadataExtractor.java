@@ -15,12 +15,11 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.util.Map;
-
 import io.rsocket.Payload;
-
 import org.springframework.core.codec.DecodingException;
 import org.springframework.util.MimeType;
+
+import java.util.Map;
 
 /**
  * Strategy to extract a map of value(s) from {@link Payload} metadata, which
@@ -30,8 +29,8 @@ import org.springframework.util.MimeType;
  * {@link org.springframework.messaging.Message Message}.
  *
  * @author Rossen Stoyanchev
- * @since 5.2
  * @see MetadataExtractorRegistry
+ * @since 5.2
  */
 public interface MetadataExtractor {
 
@@ -44,10 +43,11 @@ public interface MetadataExtractor {
 	/**
 	 * Extract a map of values from the given {@link Payload} metadata.
 	 * The Payload "route", if present, should be saved under {@link #ROUTE_KEY}.
-	 * @param payload the payload whose metadata should be read
+	 *
+	 * @param payload          the payload whose metadata should be read
 	 * @param metadataMimeType the metadata MimeType for the connection.
 	 * @return name values pairs extracted from the metadata
-	 * @throws DecodingException if the metadata cannot be decoded
+	 * @throws DecodingException        if the metadata cannot be decoded
 	 * @throws IllegalArgumentException if routing metadata cannot be decoded
 	 */
 	Map<String, Object> extract(Payload payload, MimeType metadataMimeType);

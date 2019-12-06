@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.util.Assert;
 
 /**
  * Assist with configuration for handler method return value handlers.
@@ -36,6 +36,7 @@ public class ReturnValueHandlerConfigurer {
 
 	/**
 	 * Configure custom return value handlers for handler methods.
+	 *
 	 * @param handlers the handlers to add
 	 */
 	public void addCustomHandler(HandlerMethodReturnValueHandler... handlers) {

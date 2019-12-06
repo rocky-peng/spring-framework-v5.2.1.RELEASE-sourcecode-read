@@ -16,19 +16,19 @@
 
 package org.springframework.transaction.support;
 
-import java.util.function.Consumer;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+
+import java.util.function.Consumer;
 
 /**
  * A {@link TransactionOperations} implementation which executes a given
  * {@link TransactionCallback} without an actual transaction.
  *
  * @author Juergen Hoeller
- * @since 5.2
  * @see TransactionOperations#withoutTransaction()
+ * @since 5.2
  */
 final class WithoutTransactionOperations implements TransactionOperations {
 

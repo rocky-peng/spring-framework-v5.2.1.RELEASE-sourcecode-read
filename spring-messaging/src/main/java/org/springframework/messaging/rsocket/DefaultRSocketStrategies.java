@@ -16,14 +16,7 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-
 import io.netty.buffer.PooledByteBufAllocator;
-
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
@@ -41,6 +34,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link RSocketStrategies}.
@@ -65,8 +64,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 
 	private DefaultRSocketStrategies(List<Encoder<?>> encoders, List<Decoder<?>> decoders,
-			RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry,
-			DataBufferFactory bufferFactory, MetadataExtractor metadataExtractor) {
+									 RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry,
+									 DataBufferFactory bufferFactory, MetadataExtractor metadataExtractor) {
 
 		this.encoders = Collections.unmodifiableList(encoders);
 		this.decoders = Collections.unmodifiableList(decoders);
@@ -116,20 +115,15 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		private final List<Encoder<?>> encoders = new ArrayList<>();
 
 		private final List<Decoder<?>> decoders = new ArrayList<>();
-
+		private final List<Consumer<MetadataExtractorRegistry>> metadataExtractors = new ArrayList<>();
 		@Nullable
 		private RouteMatcher routeMatcher;
-
 		@Nullable
 		private ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
 		@Nullable
 		private DataBufferFactory bufferFactory;
-
 		@Nullable
 		private MetadataExtractor metadataExtractor;
-
-		private final List<Consumer<MetadataExtractorRegistry>> metadataExtractors = new ArrayList<>();
 
 		DefaultRSocketStrategiesBuilder() {
 			this.encoders.add(CharSequenceEncoder.allMimeTypes());

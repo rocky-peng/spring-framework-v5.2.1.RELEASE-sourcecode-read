@@ -16,17 +16,8 @@
 
 package org.springframework.web.cors;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -36,6 +27,13 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The default implementation of {@link CorsProcessor}, as defined by the
@@ -58,7 +56,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	@Override
 	@SuppressWarnings("resource")
 	public boolean processRequest(@Nullable CorsConfiguration config, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+								  HttpServletResponse response) throws IOException {
 
 		response.addHeader(HttpHeaders.VARY, HttpHeaders.ORIGIN);
 		response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
@@ -78,8 +76,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			if (preFlightRequest) {
 				rejectRequest(new ServletServerHttpResponse(response));
 				return false;
-			}
-			else {
+			} else {
 				return true;
 			}
 		}
@@ -102,7 +99,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * Handle the given request.
 	 */
 	protected boolean handleInternal(ServerHttpRequest request, ServerHttpResponse response,
-			CorsConfiguration config, boolean preFlightRequest) throws IOException {
+									 CorsConfiguration config, boolean preFlightRequest) throws IOException {
 
 		String requestOrigin = request.getHeaders().getOrigin();
 		String allowOrigin = checkOrigin(config, requestOrigin);

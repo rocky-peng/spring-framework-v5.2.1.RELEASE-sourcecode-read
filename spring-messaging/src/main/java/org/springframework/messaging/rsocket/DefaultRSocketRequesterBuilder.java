@@ -16,14 +16,6 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import io.rsocket.Payload;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -31,8 +23,6 @@ import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
@@ -45,6 +35,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link RSocketRequester.Builder}.
@@ -83,6 +82,14 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private List<ClientRSocketFactoryConfigurer> rsocketConfigurers = new ArrayList<>();
 
+	private static boolean isCoreCodec(Object codec) {
+		return codec.getClass().getPackage().equals(StringDecoder.class.getPackage());
+	}
+
+	private static MimeType getMimeType(Decoder<?> decoder) {
+		MimeType mimeType = decoder.getDecodableMimeTypes().get(0);
+		return mimeType.getParameters().isEmpty() ? mimeType : new MimeType(mimeType, Collections.emptyMap());
+	}
 
 	@Override
 	public RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType) {
@@ -201,8 +208,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 				Encoder<Object> encoder = strategies.encoder(type, dataMimeType);
 				Assert.notNull(encoder, () -> "No encoder for " + dataMimeType + ", " + type);
 				data = encoder.encodeValue(this.setupData, strategies.dataBufferFactory(), type, dataMimeType, HINTS);
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				if (metadata != null) {
 					DataBufferUtils.release(metadata);
 				}
@@ -227,8 +233,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 					this.strategies != null ? this.strategies.mutate() : RSocketStrategies.builder();
 			this.strategiesConfigurers.forEach(c -> c.accept(builder));
 			return builder.build();
-		}
-		else {
+		} else {
 			return this.strategies != null ? this.strategies : RSocketStrategies.builder().build();
 		}
 	}
@@ -250,15 +255,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			}
 		}
 		throw new IllegalArgumentException("Failed to select data MimeType to use.");
-	}
-
-	private static boolean isCoreCodec(Object codec) {
-		return codec.getClass().getPackage().equals(StringDecoder.class.getPackage());
-	}
-
-	private static MimeType getMimeType(Decoder<?> decoder) {
-		MimeType mimeType = decoder.getDecodableMimeTypes().get(0);
-		return mimeType.getParameters().isEmpty() ? mimeType : new MimeType(mimeType, Collections.emptyMap());
 	}
 
 }

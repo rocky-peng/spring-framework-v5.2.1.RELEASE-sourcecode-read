@@ -16,14 +16,8 @@
 
 package org.springframework.messaging.handler;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
@@ -34,6 +28,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Encapsulates information about a handler method consisting of a
@@ -53,7 +52,9 @@ import org.springframework.util.StringUtils;
  */
 public class HandlerMethod {
 
-	/** Public for wrapping with fallback logger. */
+	/**
+	 * Public for wrapping with fallback logger.
+	 */
 	public static final Log defaultLogger = LogFactory.getLog(HandlerMethod.class);
 
 
@@ -69,11 +70,9 @@ public class HandlerMethod {
 	private final Method bridgedMethod;
 
 	private final MethodParameter[] parameters;
-
+	protected Log logger = defaultLogger;
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
-
-	protected Log logger = defaultLogger;
 
 
 	/**
@@ -92,6 +91,7 @@ public class HandlerMethod {
 
 	/**
 	 * Create an instance from a bean instance, method name, and parameter types.
+	 *
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
 	public HandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
@@ -155,6 +155,22 @@ public class HandlerMethod {
 		this.resolvedFromHandlerMethod = handlerMethod;
 	}
 
+	@Nullable
+	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
+		if (!ObjectUtils.isEmpty(providedArgs)) {
+			for (Object providedArg : providedArgs) {
+				if (parameter.getParameterType().isInstance(providedArg)) {
+					return providedArg;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
+	}
 
 	private MethodParameter[] initMethodParameters() {
 		int count = this.bridgedMethod.getParameterCount();
@@ -165,22 +181,23 @@ public class HandlerMethod {
 		return result;
 	}
 
+	/**
+	 * Return the currently configured Logger.
+	 *
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
+	}
 
 	/**
 	 * Set an alternative logger to use than the one based on the class name.
+	 *
 	 * @param logger the logger to use
 	 * @since 5.1
 	 */
 	public void setLogger(Log logger) {
 		this.logger = logger;
-	}
-
-	/**
-	 * Return the currently configured Logger.
-	 * @since 5.1
-	 */
-	public Log getLogger() {
-		return logger;
 	}
 
 	/**
@@ -247,6 +264,7 @@ public class HandlerMethod {
 	 * if no annotation can be found on the given method itself.
 	 * <p>Also supports <em>merged</em> composed annotations with attribute
 	 * overrides as of Spring Framework 4.3.
+	 *
 	 * @param annotationType the type of annotation to introspect the method for
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
@@ -258,9 +276,10 @@ public class HandlerMethod {
 
 	/**
 	 * Return whether the parameter is declared with the given annotation type.
+	 *
 	 * @param annotationType the annotation type to look for
-	 * @since 4.3
 	 * @see AnnotatedElementUtils#hasAnnotation
+	 * @since 4.3
 	 */
 	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.hasAnnotation(this.method, annotationType);
@@ -269,6 +288,7 @@ public class HandlerMethod {
 	/**
 	 * Return the HandlerMethod from which this HandlerMethod instance was
 	 * resolved via {@link #createWithResolvedBean()}.
+	 *
 	 * @since 4.3
 	 */
 	@Nullable
@@ -298,7 +318,6 @@ public class HandlerMethod {
 		return getBeanType().getSimpleName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
@@ -311,6 +330,9 @@ public class HandlerMethod {
 		return (this.bean.equals(otherMethod.bean) && this.method.equals(otherMethod.method));
 	}
 
+
+	// Support methods for use in "InvocableHandlerMethod" sub-class variants..
+
 	@Override
 	public int hashCode() {
 		return (this.bean.hashCode() * 31 + this.method.hashCode());
@@ -319,26 +341,6 @@ public class HandlerMethod {
 	@Override
 	public String toString() {
 		return this.method.toGenericString();
-	}
-
-
-	// Support methods for use in "InvocableHandlerMethod" sub-class variants..
-
-	@Nullable
-	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
-		if (!ObjectUtils.isEmpty(providedArgs)) {
-			for (Object providedArg : providedArgs) {
-				if (parameter.getParameterType().isInstance(providedArg)) {
-					return providedArg;
-				}
-			}
-		}
-		return null;
-	}
-
-	protected static String formatArgumentError(MethodParameter param, String message) {
-		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 	/**

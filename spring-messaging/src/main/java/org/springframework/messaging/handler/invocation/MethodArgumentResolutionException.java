@@ -26,8 +26,8 @@ import org.springframework.messaging.MessagingException;
  * {@link org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver}.
  *
  * @author Juergen Hoeller
- * @since 4.3.6
  * @see HandlerMethodArgumentResolver
+ * @since 4.3.6
  */
 @SuppressWarnings("serial")
 public class MethodArgumentResolutionException extends MessagingException {
@@ -63,18 +63,16 @@ public class MethodArgumentResolutionException extends MessagingException {
 		this.parameter = parameter;
 	}
 
+	private static String getMethodParameterMessage(MethodParameter parameter) {
+		return "Could not resolve method parameter at index " + parameter.getParameterIndex() +
+				" in " + parameter.getExecutable().toGenericString();
+	}
 
 	/**
 	 * Return the MethodParameter that was rejected.
 	 */
 	public final MethodParameter getMethodParameter() {
 		return this.parameter;
-	}
-
-
-	private static String getMethodParameterMessage(MethodParameter parameter) {
-		return "Could not resolve method parameter at index " + parameter.getParameterIndex() +
-				" in " + parameter.getExecutable().toGenericString();
 	}
 
 }

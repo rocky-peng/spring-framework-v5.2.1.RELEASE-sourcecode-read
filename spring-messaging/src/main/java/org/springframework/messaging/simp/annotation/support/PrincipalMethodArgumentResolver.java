@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.security.Principal;
-import java.util.Optional;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+
+import java.security.Principal;
+import java.util.Optional;
 
 /**
  * Resolver for arguments of type {@link Principal}, including {@code Optional<Principal>}.
@@ -40,7 +40,7 @@ public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentRes
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message<?> message){
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) {
 		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		return parameter.isOptional() ? Optional.ofNullable(user) : user;
 	}

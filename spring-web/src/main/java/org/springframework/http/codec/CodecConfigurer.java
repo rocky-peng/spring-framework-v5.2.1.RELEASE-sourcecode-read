@@ -16,10 +16,10 @@
 
 package org.springframework.http.codec;
 
-import java.util.List;
-
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+
+import java.util.List;
 
 /**
  * Defines a common interface for configuring either client or server HTTP
@@ -56,6 +56,7 @@ public interface CodecConfigurer {
 	/**
 	 * Provides a way to customize or replace HTTP message readers and writers
 	 * registered by default.
+	 *
 	 * @see #registerDefaults(boolean)
 	 */
 	DefaultCodecs defaultCodecs();
@@ -98,6 +99,7 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Jackson JSON {@code Decoder}.
+		 *
 		 * @param decoder the decoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonDecoder
 		 */
@@ -105,6 +107,7 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Jackson JSON {@code Encoder}.
+		 *
 		 * @param encoder the encoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
 		 */
@@ -112,34 +115,38 @@ public interface CodecConfigurer {
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.
+		 *
 		 * @param decoder the decoder instance to use
-		 * @since 5.1
 		 * @see org.springframework.http.codec.protobuf.ProtobufDecoder
+		 * @since 5.1
 		 */
 		void protobufDecoder(Decoder<?> decoder);
 
 		/**
 		 * Override the default Protobuf {@code Encoder}.
+		 *
 		 * @param encoder the encoder instance to use
-		 * @since 5.1
 		 * @see org.springframework.http.codec.protobuf.ProtobufEncoder
 		 * @see org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter
+		 * @since 5.1
 		 */
 		void protobufEncoder(Encoder<?> encoder);
 
 		/**
 		 * Override the default JAXB2 {@code Decoder}.
+		 *
 		 * @param decoder the decoder instance to use
-		 * @since 5.1.3
 		 * @see org.springframework.http.codec.xml.Jaxb2XmlDecoder
+		 * @since 5.1.3
 		 */
 		void jaxb2Decoder(Decoder<?> decoder);
 
 		/**
 		 * Override the default JABX2 {@code Encoder}.
+		 *
 		 * @param encoder the encoder instance to use
-		 * @since 5.1.3
 		 * @see org.springframework.http.codec.xml.Jaxb2XmlEncoder
+		 * @since 5.1.3
 		 */
 		void jaxb2Encoder(Encoder<?> encoder);
 
@@ -153,6 +160,7 @@ public interface CodecConfigurer {
 		 * in which case the limit applies to data buffered between delimiters.
 		 * <p>By default this is not set, in which case individual codec defaults
 		 * apply. All codecs are limited to 256K by default.
+		 *
 		 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
 		 * @since 5.1.11
 		 */
@@ -162,6 +170,7 @@ public interface CodecConfigurer {
 		 * Whether to log form data at DEBUG level, and headers at TRACE level.
 		 * Both may contain sensitive information.
 		 * <p>By default set to {@code false} so that request details are not shown.
+		 *
 		 * @param enable whether to enable or not
 		 * @since 5.1
 		 */
@@ -177,6 +186,7 @@ public interface CodecConfigurer {
 		/**
 		 * Add a custom {@code Decoder} internally wrapped with
 		 * {@link DecoderHttpMessageReader}).
+		 *
 		 * @param decoder the decoder to add
 		 */
 		void decoder(Decoder<?> decoder);
@@ -184,6 +194,7 @@ public interface CodecConfigurer {
 		/**
 		 * Add a custom {@code Encoder}, internally wrapped with
 		 * {@link EncoderHttpMessageWriter}.
+		 *
 		 * @param encoder the encoder to add
 		 */
 		void encoder(Encoder<?> encoder);
@@ -192,6 +203,7 @@ public interface CodecConfigurer {
 		 * Add a custom {@link HttpMessageReader}. For readers of type
 		 * {@link DecoderHttpMessageReader} consider using the shortcut
 		 * {@link #decoder(Decoder)} instead.
+		 *
 		 * @param reader the reader to add
 		 */
 		void reader(HttpMessageReader<?> reader);
@@ -200,6 +212,7 @@ public interface CodecConfigurer {
 		 * Add a custom {@link HttpMessageWriter}. For writers of type
 		 * {@link EncoderHttpMessageWriter} consider using the shortcut
 		 * {@link #encoder(Encoder)} instead.
+		 *
 		 * @param writer the writer to add
 		 */
 		void writer(HttpMessageWriter<?> writer);

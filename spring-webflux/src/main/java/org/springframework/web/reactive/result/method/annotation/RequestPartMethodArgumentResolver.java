@@ -16,12 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
-import java.util.List;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -37,6 +31,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Resolver for {@code @RequestPart} arguments where the named part is decoded
@@ -91,8 +90,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 			MethodParameter elementType = parameter.nested();
 			if (Part.class.isAssignableFrom(elementType.getNestedParameterType())) {
 				return parts.collectList().cast(Object.class);
-			}
-			else {
+			} else {
 				return decodePartValues(parts, elementType, bindingContext, exchange, isRequired)
 						.collectList().cast(Object.class);
 			}
@@ -130,7 +128,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 
 
 	private Flux<?> decodePartValues(Flux<Part> parts, MethodParameter elementType, BindingContext bindingContext,
-			ServerWebExchange exchange, boolean isRequired) {
+									 ServerWebExchange exchange, boolean isRequired) {
 
 		return parts.flatMap(part -> {
 			ServerHttpRequest partRequest = new PartServerHttpRequest(exchange.getRequest(), part);

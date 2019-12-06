@@ -16,20 +16,19 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.util.function.Consumer;
-
 import org.hamcrest.Matcher;
-
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
+
+import java.util.function.Consumer;
 
 /**
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
  * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
  * @see JsonPathExpectationsHelper
+ * @since 5.0
  */
 public class JsonPathAssertions {
 
@@ -89,6 +88,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Applies {@link JsonPathExpectationsHelper#hasJsonPath}.
+	 *
 	 * @since 5.0.3
 	 */
 	public WebTestClient.BodyContentSpec hasJsonPath() {
@@ -98,6 +98,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Applies {@link JsonPathExpectationsHelper#doesNotHaveJsonPath}.
+	 *
 	 * @since 5.0.3
 	 */
 	public WebTestClient.BodyContentSpec doesNotHaveJsonPath() {
@@ -139,6 +140,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
+	 *
 	 * @since 5.1
 	 */
 	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher) {
@@ -148,6 +150,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 *
 	 * @since 5.1
 	 */
 	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher, Class<T> targetType) {
@@ -157,6 +160,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Consume the result of the JSONPath evaluation.
+	 *
 	 * @since 5.1
 	 */
 	@SuppressWarnings("unchecked")
@@ -168,6 +172,7 @@ public class JsonPathAssertions {
 
 	/**
 	 * Consume the result of the JSONPath evaluation and provide a target class.
+	 *
 	 * @since 5.1
 	 */
 	@SuppressWarnings("unchecked")

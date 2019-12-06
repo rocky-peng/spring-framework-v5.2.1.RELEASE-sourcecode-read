@@ -15,12 +15,6 @@
  */
 package org.springframework.build.api;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-
 import me.champeau.gradle.japicmp.JapicmpPlugin;
 import me.champeau.gradle.japicmp.JapicmpTask;
 import org.gradle.api.Plugin;
@@ -32,6 +26,12 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * {@link Plugin} that applies the {@code "japicmp-gradle-plugin"}

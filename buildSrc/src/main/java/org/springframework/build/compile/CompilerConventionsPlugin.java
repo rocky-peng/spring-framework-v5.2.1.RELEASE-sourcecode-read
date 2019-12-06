@@ -16,16 +16,16 @@
 
 package org.springframework.build.compile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.compile.JavaCompile;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link Plugin} that applies conventions for compiling Java sources in Spring Framework.
@@ -73,6 +73,7 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 
 	/**
 	 * Applies the common Java compiler options for sources and test sources.
+	 *
 	 * @param project the current project
 	 */
 	private void applyJavaCompileConventions(Project project) {
@@ -80,8 +81,7 @@ public class CompilerConventionsPlugin implements Plugin<Project> {
 		if (project.hasProperty(JAVA_SOURCE_VERSION_PROPERTY)) {
 			JavaVersion javaSourceVersion = JavaVersion.toVersion(project.property(JAVA_SOURCE_VERSION_PROPERTY));
 			java.setSourceCompatibility(javaSourceVersion);
-		}
-		else {
+		} else {
 			java.setSourceCompatibility(DEFAULT_COMPILER_VERSION);
 		}
 		java.setTargetCompatibility(DEFAULT_COMPILER_VERSION);

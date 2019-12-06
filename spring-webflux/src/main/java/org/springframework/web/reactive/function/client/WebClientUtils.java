@@ -16,16 +16,15 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.List;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
  * Internal methods shared between {@link DefaultWebClient} and {@link DefaultClientResponse}.
@@ -38,13 +37,13 @@ abstract class WebClientUtils {
 	/**
 	 * Create a delayed {@link ResponseEntity} from the given response and body.
 	 */
-	public static  <T> Mono<ResponseEntity<T>> toEntity(ClientResponse response, Mono<T> bodyMono) {
+	public static <T> Mono<ResponseEntity<T>> toEntity(ClientResponse response, Mono<T> bodyMono) {
 		return Mono.defer(() -> {
 			HttpHeaders headers = response.headers().asHttpHeaders();
 			int status = response.rawStatusCode();
 			return bodyMono
 					.map(body -> createEntity(body, headers, status))
-					.switchIfEmpty(Mono.fromCallable( () -> createEntity(null, headers, status)));
+					.switchIfEmpty(Mono.fromCallable(() -> createEntity(null, headers, status)));
 		});
 	}
 
@@ -61,7 +60,7 @@ abstract class WebClientUtils {
 		});
 	}
 
-	public static  <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
+	public static <T> ResponseEntity<T> createEntity(@Nullable T body, HttpHeaders headers, int status) {
 		HttpStatus resolvedStatus = HttpStatus.resolve(status);
 		return resolvedStatus != null
 				? new ResponseEntity<>(body, headers, resolvedStatus)

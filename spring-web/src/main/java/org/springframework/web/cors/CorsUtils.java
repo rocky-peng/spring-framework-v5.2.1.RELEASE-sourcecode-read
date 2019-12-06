@@ -16,14 +16,14 @@
 
 package org.springframework.web.cors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Utility class for CORS request handling based on the
@@ -57,8 +57,7 @@ public abstract class CorsUtils {
 		if (port == -1) {
 			if ("http".equals(scheme) || "ws".equals(scheme)) {
 				port = 80;
-			}
-			else if ("https".equals(scheme) || "wss".equals(scheme)) {
+			} else if ("https".equals(scheme) || "wss".equals(scheme)) {
 				port = 443;
 			}
 		}

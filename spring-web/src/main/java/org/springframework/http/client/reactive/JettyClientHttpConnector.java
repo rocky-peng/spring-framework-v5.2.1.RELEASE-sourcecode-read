@@ -16,28 +16,27 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.URI;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.reactive.client.ContentChunk;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * {@link ClientHttpConnector} for the Jetty Reactive Streams HttpClient.
  *
  * @author Sebastien Deleuze
- * @since 5.1
  * @see <a href="https://github.com/jetty-project/jetty-reactive-httpclient">Jetty ReactiveStreams HttpClient</a>
+ * @since 5.1
  */
 public class JettyClientHttpConnector implements ClientHttpConnector {
 
@@ -63,7 +62,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	/**
 	 * Constructor with an initialized {@link HttpClient} and configures it
 	 * with the given {@link JettyResourceFactory}.
-	 * @param httpClient the {@link HttpClient} to use
+	 *
+	 * @param httpClient      the {@link HttpClient} to use
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
 	 * @since 5.2
 	 */
@@ -79,8 +79,9 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	/**
 	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
+	 *
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
-	 * @param customizer the lambda used to customize the {@link HttpClient}
+	 * @param customizer      the lambda used to customize the {@link HttpClient}
 	 * @deprecated as of 5.2, in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
 	 */
 	@Deprecated
@@ -99,7 +100,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
-			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
+											Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
 		if (!uri.isAbsolute()) {
 			return Mono.error(new IllegalArgumentException("URI is not absolute: " + uri));
@@ -108,8 +109,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		if (!this.httpClient.isStarted()) {
 			try {
 				this.httpClient.start();
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				return Mono.error(ex);
 			}
 		}

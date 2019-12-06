@@ -16,17 +16,8 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
-import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
@@ -35,6 +26,14 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.MessagingAdviceBean;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Help to initialize and invoke an {@link InvocableHandlerMethod}, and to then
@@ -54,16 +53,12 @@ class InvocableHelper {
 
 	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
 			new HandlerMethodReturnValueHandlerComposite();
-
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
 	private final Function<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionMethodResolverFactory;
-
 	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
-
 	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<>(64);
+	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	public InvocableHelper(
@@ -89,6 +84,13 @@ class InvocableHelper {
 	}
 
 	/**
+	 * Return the configured registry for adapting reactive types.
+	 */
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.reactiveAdapterRegistry;
+	}
+
+	/**
 	 * Configure the registry for adapting various reactive types.
 	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
 	 * default settings.
@@ -96,13 +98,6 @@ class InvocableHelper {
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		Assert.notNull(registry, "ReactiveAdapterRegistry is required");
 		this.reactiveAdapterRegistry = registry;
-	}
-
-	/**
-	 * Return the configured registry for adapting reactive types.
-	 */
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
-		return this.reactiveAdapterRegistry;
 	}
 
 	/**
@@ -118,6 +113,7 @@ class InvocableHelper {
 
 	/**
 	 * Create {@link InvocableHandlerMethod} with the configured arg resolvers.
+	 *
 	 * @param handlerMethod the target handler method to invoke
 	 * @return the created instance
 	 */
@@ -134,8 +130,9 @@ class InvocableHelper {
 	 * the HandlerMethod first and if not found, it continues searching for
 	 * additional handling methods registered via
 	 * {@link #registerExceptionHandlerAdvice}.
+	 *
 	 * @param handlerMethod the method where the exception was raised
-	 * @param ex the exception raised or signaled
+	 * @param ex            the exception raised or signaled
 	 * @return a method to handle the exception, or {@code null}
 	 */
 	@Nullable
@@ -153,8 +150,7 @@ class InvocableHelper {
 		Method method = resolver.resolveMethod(ex);
 		if (method != null) {
 			exceptionHandlerMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
-		}
-		else {
+		} else {
 			for (Map.Entry<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 				MessagingAdviceBean advice = entry.getKey();
 				if (advice.isApplicableToBeanType(beanType)) {
@@ -170,8 +166,7 @@ class InvocableHelper {
 		if (exceptionHandlerMethod != null) {
 			logger.debug("Found exception handler " + exceptionHandlerMethod.getShortLogMessage());
 			exceptionHandlerMethod.setArgumentResolvers(this.argumentResolvers.getResolvers());
-		}
-		else {
+		} else {
 			logger.error("No exception handling method", ex);
 		}
 		return exceptionHandlerMethod;

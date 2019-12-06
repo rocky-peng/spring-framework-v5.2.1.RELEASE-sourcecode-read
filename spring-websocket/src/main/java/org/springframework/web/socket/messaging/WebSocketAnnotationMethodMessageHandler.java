@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
@@ -28,6 +25,9 @@ import org.springframework.messaging.handler.annotation.support.AnnotationExcept
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.web.method.ControllerAdviceBean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support
@@ -40,7 +40,7 @@ import org.springframework.web.method.ControllerAdviceBean;
 public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
 	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel,
-			MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
+												   MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
 
 		super(clientInChannel, clientOutChannel, brokerTemplate);
 	}

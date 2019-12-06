@@ -16,20 +16,6 @@
 
 package org.springframework.messaging.handler.annotation.reactive;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -60,6 +46,19 @@ import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking
@@ -77,8 +76,8 @@ import org.springframework.validation.Validator;
  * {@link #initReturnValueHandlers()} to set up default return value handlers.
  *
  * @author Rossen Stoyanchev
- * @since 5.2
  * @see AbstractEncoderMethodReturnValueHandler
+ * @since 5.2
  */
 public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>
 		implements EmbeddedValueResolverAware {
@@ -101,6 +100,12 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
 	}
 
+	/**
+	 * Return the configured decoders.
+	 */
+	public List<? extends Decoder<?>> getDecoders() {
+		return this.decoders;
+	}
 
 	/**
 	 * Configure the decoders to use for incoming payloads.
@@ -111,14 +116,16 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Return the configured decoders.
+	 * Return the configured Validator instance.
 	 */
-	public List<? extends Decoder<?>> getDecoders() {
-		return this.decoders;
+	@Nullable
+	public Validator getValidator() {
+		return this.validator;
 	}
 
 	/**
 	 * Set the Validator instance used for validating {@code @Payload} arguments.
+	 *
 	 * @see org.springframework.validation.annotation.Validated
 	 * @see PayloadMethodArgumentResolver
 	 */
@@ -127,11 +134,12 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Return the configured Validator instance.
+	 * Return the {@code RouteMatcher} used to map messages to handlers.
+	 * May be {@code null} before the component is initialized.
 	 */
 	@Nullable
-	public Validator getValidator() {
-		return this.validator;
+	public RouteMatcher getRouteMatcher() {
+		return this.routeMatcher;
 	}
 
 	/**
@@ -147,16 +155,8 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Return the {@code RouteMatcher} used to map messages to handlers.
-	 * May be {@code null} before the component is initialized.
-	 */
-	@Nullable
-	public RouteMatcher getRouteMatcher() {
-		return this.routeMatcher;
-	}
-
-	/**
 	 * Obtain the {@code RouteMatcher} for actual use.
+	 *
 	 * @return the RouteMatcher (never {@code null})
 	 * @throws IllegalStateException in case of no RouteMatcher set
 	 * @since 5.0
@@ -168,20 +168,21 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Configure a {@link ConversionService} to use for type conversion of
-	 * String based values, e.g. in destination variables or headers.
-	 * <p>By default {@link DefaultFormattingConversionService} is used.
-	 * @param conversionService the conversion service to use
-	 */
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-	/**
 	 * Return the configured ConversionService.
 	 */
 	public ConversionService getConversionService() {
 		return this.conversionService;
+	}
+
+	/**
+	 * Configure a {@link ConversionService} to use for type conversion of
+	 * String based values, e.g. in destination variables or headers.
+	 * <p>By default {@link DefaultFormattingConversionService} is used.
+	 *
+	 * @param conversionService the conversion service to use
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
 	}
 
 	@Override
@@ -251,6 +252,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	/**
 	 * Determine the mapping condition for the given annotated element.
+	 *
 	 * @param element the element to check
 	 * @return the condition, or {@code null}
 	 */
@@ -267,6 +269,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	/**
 	 * Resolve placeholders in the given destinations.
+	 *
 	 * @param destinations the destinations
 	 * @return new array with the processed destinations or the same array
 	 */

@@ -16,13 +16,13 @@
 
 package org.springframework.transaction.reactive;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 /**
  * Mutable transaction context that encapsulates transactional synchronizations and
@@ -32,13 +32,14 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
- * @since 5.2
  * @see TransactionContextManager
  * @see reactor.util.context.Context
+ * @since 5.2
  */
 public class TransactionContext {
 
-	private final @Nullable TransactionContext parent;
+	private final @Nullable
+	TransactionContext parent;
 
 	private final UUID contextId = UUID.randomUUID();
 
@@ -47,11 +48,13 @@ public class TransactionContext {
 	@Nullable
 	private Set<TransactionSynchronization> synchronizations;
 
-	private volatile @Nullable String currentTransactionName;
+	private volatile @Nullable
+	String currentTransactionName;
 
 	private volatile boolean currentTransactionReadOnly;
 
-	private volatile @Nullable Integer currentTransactionIsolationLevel;
+	private volatile @Nullable
+	Integer currentTransactionIsolationLevel;
 
 	private volatile boolean actualTransactionActive;
 
@@ -85,17 +88,13 @@ public class TransactionContext {
 		return this.resources;
 	}
 
-	public void setSynchronizations(@Nullable Set<TransactionSynchronization> synchronizations) {
-		this.synchronizations = synchronizations;
-	}
-
 	@Nullable
 	public Set<TransactionSynchronization> getSynchronizations() {
 		return this.synchronizations;
 	}
 
-	public void setCurrentTransactionName(@Nullable String currentTransactionName) {
-		this.currentTransactionName = currentTransactionName;
+	public void setSynchronizations(@Nullable Set<TransactionSynchronization> synchronizations) {
+		this.synchronizations = synchronizations;
 	}
 
 	@Nullable
@@ -103,16 +102,16 @@ public class TransactionContext {
 		return this.currentTransactionName;
 	}
 
-	public void setCurrentTransactionReadOnly(boolean currentTransactionReadOnly) {
-		this.currentTransactionReadOnly = currentTransactionReadOnly;
+	public void setCurrentTransactionName(@Nullable String currentTransactionName) {
+		this.currentTransactionName = currentTransactionName;
 	}
 
 	public boolean isCurrentTransactionReadOnly() {
 		return this.currentTransactionReadOnly;
 	}
 
-	public void setCurrentTransactionIsolationLevel(@Nullable Integer currentTransactionIsolationLevel) {
-		this.currentTransactionIsolationLevel = currentTransactionIsolationLevel;
+	public void setCurrentTransactionReadOnly(boolean currentTransactionReadOnly) {
+		this.currentTransactionReadOnly = currentTransactionReadOnly;
 	}
 
 	@Nullable
@@ -120,14 +119,17 @@ public class TransactionContext {
 		return this.currentTransactionIsolationLevel;
 	}
 
-	public void setActualTransactionActive(boolean actualTransactionActive) {
-		this.actualTransactionActive = actualTransactionActive;
+	public void setCurrentTransactionIsolationLevel(@Nullable Integer currentTransactionIsolationLevel) {
+		this.currentTransactionIsolationLevel = currentTransactionIsolationLevel;
 	}
 
 	public boolean isActualTransactionActive() {
 		return this.actualTransactionActive;
 	}
 
+	public void setActualTransactionActive(boolean actualTransactionActive) {
+		this.actualTransactionActive = actualTransactionActive;
+	}
 
 	public void clear() {
 		this.synchronizations = null;

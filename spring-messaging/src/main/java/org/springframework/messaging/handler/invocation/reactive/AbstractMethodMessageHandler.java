@@ -16,24 +16,8 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -54,6 +38,21 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.RouteMatcher;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for reactive HandlerMethod-based message handling.
@@ -63,9 +62,9 @@ import org.springframework.util.RouteMatcher;
  * <p>Also supports discovering and invoking exception handling methods to process
  * exceptions raised during message handling.
  *
+ * @param <T> the type of the Object that contains information mapping information
  * @author Rossen Stoyanchev
  * @since 5.2
- * @param <T> the type of the Object that contains information mapping information
  */
 public abstract class AbstractMethodMessageHandler<T>
 		implements ReactiveMessageHandler, ApplicationContextAware, InitializingBean, BeanNameAware {
@@ -84,41 +83,19 @@ public abstract class AbstractMethodMessageHandler<T>
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-
-	@Nullable
-	private Predicate<Class<?>> handlerPredicate;
-
+	private final InvocableHelper invocableHelper = new InvocableHelper(this::createExceptionMethodResolverFor);
+	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
+	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
 	@Nullable
 	List<Object> handlers;
-
+	@Nullable
+	private Predicate<Class<?>> handlerPredicate;
 	private ArgumentResolverConfigurer argumentResolverConfigurer = new ArgumentResolverConfigurer();
-
 	private ReturnValueHandlerConfigurer returnValueHandlerConfigurer = new ReturnValueHandlerConfigurer();
-
-	private final InvocableHelper invocableHelper = new InvocableHelper(this::createExceptionMethodResolverFor);
-
 	@Nullable
 	private ApplicationContext applicationContext;
-
 	@Nullable
 	private String beanName;
-
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
-
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
-
-
-	/**
-	 * Configure a predicate for selecting which Spring beans to check for the
-	 * presence of message handler methods.
-	 * <p>This is not set by default. However sub-classes may initialize it to
-	 * some default strategy (e.g. {@code @Controller} classes).
-	 * @see #setHandlers(List)
-	 */
-	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
-		this.handlerPredicate = handlerPredicate;
-	}
 
 	/**
 	 * Return the {@link #setHandlerPredicate configured} handler predicate.
@@ -129,16 +106,36 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
+	 * Configure a predicate for selecting which Spring beans to check for the
+	 * presence of message handler methods.
+	 * <p>This is not set by default. However sub-classes may initialize it to
+	 * some default strategy (e.g. {@code @Controller} classes).
+	 *
+	 * @see #setHandlers(List)
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
+
+	/**
 	 * Manually configure the handlers to check for the presence of message
 	 * handling methods, which also disables auto-detection via a
 	 * {@link #setHandlerPredicate(Predicate) handlerPredicate}. If you do not
 	 * want to disable auto-detection, then call this method first, and then set
 	 * the handler predicate.
+	 *
 	 * @param handlers the handlers to check
 	 */
 	public void setHandlers(List<Object> handlers) {
 		this.handlers = handlers;
 		this.handlerPredicate = null;
+	}
+
+	/**
+	 * Return the configured custom resolvers for handler method arguments.
+	 */
+	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
+		return this.argumentResolverConfigurer;
 	}
 
 	/**
@@ -150,10 +147,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured custom resolvers for handler method arguments.
+	 * Return the configured return value handlers.
 	 */
-	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
-		return this.argumentResolverConfigurer;
+	public ReturnValueHandlerConfigurer getReturnValueHandlerConfigurer() {
+		return this.returnValueHandlerConfigurer;
 	}
 
 	/**
@@ -165,10 +162,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured return value handlers.
+	 * Return the configured registry for adapting reactive types.
 	 */
-	public ReturnValueHandlerConfigurer getReturnValueHandlerConfigurer() {
-		return this.returnValueHandlerConfigurer;
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.invocableHelper.getReactiveAdapterRegistry();
 	}
 
 	/**
@@ -180,11 +177,9 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.invocableHelper.setReactiveAdapterRegistry(registry);
 	}
 
-	/**
-	 * Return the configured registry for adapting reactive types.
-	 */
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
-		return this.invocableHelper.getReactiveAdapterRegistry();
+	@Nullable
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 	@Override
@@ -192,19 +187,14 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.applicationContext = applicationContext;
 	}
 
-	@Nullable
-	public ApplicationContext getApplicationContext() {
-		return this.applicationContext;
+	public String getBeanName() {
+		return (this.beanName != null ? this.beanName :
+				getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this));
 	}
 
 	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
-	}
-
-	public String getBeanName() {
-		return (this.beanName != null ? this.beanName :
-				getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this));
 	}
 
 	/**
@@ -288,8 +278,7 @@ public abstract class AbstractMethodMessageHandler<T>
 				Class<?> beanType = null;
 				try {
 					beanType = this.applicationContext.getType(beanName);
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
@@ -308,6 +297,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p><strong>Note:</strong> This method is protected and can be invoked by
 	 * subclasses, but this should be done on startup only as documented in
 	 * {@link #registerHandlerMethod}.
+	 *
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
 	protected final void detectHandlerMethods(Object handler) {
@@ -316,8 +306,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			ApplicationContext context = getApplicationContext();
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
 			handlerType = context.getType((String) handler);
-		}
-		else {
+		} else {
 			handlerType = handler.getClass();
 		}
 		if (handlerType != null) {
@@ -348,7 +337,8 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Obtain the mapping for the given method, if any.
-	 * @param method the method to check
+	 *
+	 * @param method      the method to check
 	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
@@ -360,11 +350,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * <p><strong>Note:</strong> This method is protected and can be invoked by
 	 * subclasses. Keep in mind however that the registration is not protected
 	 * for concurrent use, and is expected to be done on startup.
+	 *
 	 * @param handler the bean name of the handler or the handler instance
-	 * @param method the method to register
+	 * @param method  the method to register
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
-	 * under the same mapping
+	 *                               under the same mapping
 	 */
 	protected final void registerHandlerMethod(Object handler, Method method, T mapping) {
 		Assert.notNull(mapping, "Mapping must not be null");
@@ -395,8 +386,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
 			String beanName = (String) handler;
 			handlerMethod = new HandlerMethod(beanName, context.getAutowireCapableBeanFactory(), method);
-		}
-		else {
+		} else {
 			handlerMethod = new HandlerMethod(handler, method);
 		}
 		return handlerMethod;
@@ -466,6 +456,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Extract the destination from the given message.
+	 *
 	 * @see #getDirectLookupMappings(Object)
 	 */
 	@Nullable
@@ -485,6 +476,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Check if a mapping matches the current message and return a possibly
 	 * new mapping with conditions relevant to the current request.
+	 *
 	 * @param mapping the mapping to get a match for
 	 * @param message the message being handled
 	 * @return the match or {@code null} if there is no match
@@ -495,6 +487,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Return a comparator for sorting matching mappings.
 	 * The returned comparator should sort 'better' matches higher.
+	 *
 	 * @param message the current Message
 	 * @return the comparator, never {@code null}
 	 */
@@ -502,8 +495,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Invoked when no matching handler is found.
+	 *
 	 * @param destination the destination
-	 * @param message the message
+	 * @param message     the message
 	 */
 	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
 		logger.debug("No handlers for destination '" +
@@ -514,6 +508,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Create a concrete instance of {@link AbstractExceptionHandlerMethodResolver}
 	 * that finds exception handling methods based on some criteria, e.g. based
 	 * on the presence of {@code @MessageExceptionHandler}.
+	 *
 	 * @param beanType the class in which an exception occurred during handling
 	 * @return the resolver to use
 	 */

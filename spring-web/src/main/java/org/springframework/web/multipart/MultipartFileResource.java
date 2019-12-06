@@ -16,12 +16,12 @@
 
 package org.springframework.web.multipart;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.core.io.AbstractResource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Adapt {@link MultipartFile} to {@link org.springframework.core.io.Resource},

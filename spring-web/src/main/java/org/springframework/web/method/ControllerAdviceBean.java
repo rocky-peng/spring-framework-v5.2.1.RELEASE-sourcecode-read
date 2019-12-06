@@ -16,9 +16,6 @@
 
 package org.springframework.web.method;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +27,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encapsulates information about an {@link ControllerAdvice @ControllerAdvice}
@@ -52,28 +52,24 @@ public class ControllerAdviceBean implements Ordered {
 	 * the bean name.
 	 */
 	private final Object beanOrName;
-
+	@Nullable
+	private final Class<?> beanType;
+	private final HandlerTypePredicate beanTypePredicate;
+	@Nullable
+	private final BeanFactory beanFactory;
 	/**
 	 * Reference to the resolved bean instance, potentially lazily retrieved
 	 * via the {@code BeanFactory}.
 	 */
 	@Nullable
 	private Object resolvedBean;
-
-	@Nullable
-	private final Class<?> beanType;
-
-	private final HandlerTypePredicate beanTypePredicate;
-
-	@Nullable
-	private final BeanFactory beanFactory;
-
 	@Nullable
 	private Integer order;
 
 
 	/**
 	 * Create a {@code ControllerAdviceBean} using the given bean instance.
+	 *
 	 * @param bean the bean instance
 	 */
 	public ControllerAdviceBean(Object bean) {
@@ -88,9 +84,10 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Create a {@code ControllerAdviceBean} using the given bean name and
 	 * {@code BeanFactory}.
-	 * @param beanName the name of the bean
+	 *
+	 * @param beanName    the name of the bean
 	 * @param beanFactory a {@code BeanFactory} to retrieve the bean type initially
-	 * and later to resolve the actual bean
+	 *                    and later to resolve the actual bean
 	 */
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
 		this(beanName, beanFactory, null);
@@ -100,11 +97,12 @@ public class ControllerAdviceBean implements Ordered {
 	 * Create a {@code ControllerAdviceBean} using the given bean name,
 	 * {@code BeanFactory}, and {@link ControllerAdvice @ControllerAdvice}
 	 * annotation.
-	 * @param beanName the name of the bean
-	 * @param beanFactory a {@code BeanFactory} to retrieve the bean type initially
-	 * and later to resolve the actual bean
+	 *
+	 * @param beanName         the name of the bean
+	 * @param beanFactory      a {@code BeanFactory} to retrieve the bean type initially
+	 *                         and later to resolve the actual bean
 	 * @param controllerAdvice the {@code @ControllerAdvice} annotation for the
-	 * bean, or {@code null} if not yet retrieved
+	 *                         bean, or {@code null} if not yet retrieved
 	 * @since 5.2
 	 */
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory, @Nullable ControllerAdvice controllerAdvice) {
@@ -120,107 +118,13 @@ public class ControllerAdviceBean implements Ordered {
 		this.beanFactory = beanFactory;
 	}
 
-
-	/**
-	 * Get the order value for the contained bean.
-	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
-	 * the following algorithm and cached.
-	 * <ul>
-	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
-	 * use the value returned by {@link Ordered#getOrder()}.</li>
-	 * <li>Otherwise use the value returned by {@link OrderUtils#getOrder(Class, int)}
-	 * with {@link Ordered#LOWEST_PRECEDENCE} used as the default order value.</li>
-	 * </ul>
-	 * @see #resolveBean()
-	 */
-	@Override
-	public int getOrder() {
-		if (this.order == null) {
-			Object resolvedBean = resolveBean();
-			if (resolvedBean instanceof Ordered) {
-				this.order = ((Ordered) resolvedBean).getOrder();
-			}
-			else if (this.beanType != null) {
-				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
-			}
-			else {
-				this.order = Ordered.LOWEST_PRECEDENCE;
-			}
-		}
-		return this.order;
-	}
-
-	/**
-	 * Return the type of the contained bean.
-	 * <p>If the bean type is a CGLIB-generated class, the original user-defined
-	 * class is returned.
-	 */
-	@Nullable
-	public Class<?> getBeanType() {
-		return this.beanType;
-	}
-
-	/**
-	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
-	 * resolving the bean name through the {@link BeanFactory}.
-	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
-	 * will be cached, thereby avoiding repeated lookups in the {@code BeanFactory}.
-	 */
-	public Object resolveBean() {
-		if (this.resolvedBean == null) {
-			// this.beanOrName must be a String representing the bean name if
-			// this.resolvedBean is null.
-			this.resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
-		}
-		return this.resolvedBean;
-	}
-
-	private BeanFactory obtainBeanFactory() {
-		Assert.state(this.beanFactory != null, "No BeanFactory set");
-		return this.beanFactory;
-	}
-
-	/**
-	 * Check whether the given bean type should be advised by this
-	 * {@code ControllerAdviceBean}.
-	 * @param beanType the type of the bean to check
-	 * @since 4.0
-	 * @see ControllerAdvice
-	 */
-	public boolean isApplicableToBeanType(@Nullable Class<?> beanType) {
-		return this.beanTypePredicate.test(beanType);
-	}
-
-
-	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ControllerAdviceBean)) {
-			return false;
-		}
-		ControllerAdviceBean otherAdvice = (ControllerAdviceBean) other;
-		return (this.beanOrName.equals(otherAdvice.beanOrName) && this.beanFactory == otherAdvice.beanFactory);
-	}
-
-	@Override
-	public int hashCode() {
-		return this.beanOrName.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.beanOrName.toString();
-	}
-
-
 	/**
 	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
 	 * given {@link ApplicationContext} and wrap them as {@code ControllerAdviceBean}
 	 * instances.
 	 * <p>As of Spring Framework 5.2, the {@code ControllerAdviceBean} instances
 	 * in the returned list are sorted using {@link OrderComparator#sort(List)}.
+	 *
 	 * @see #getOrder()
 	 * @see OrderComparator
 	 * @see Ordered
@@ -261,6 +165,98 @@ public class ControllerAdviceBean implements Ordered {
 					.build();
 		}
 		return HandlerTypePredicate.forAnyHandlerType();
+	}
+
+	/**
+	 * Get the order value for the contained bean.
+	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
+	 * the following algorithm and cached.
+	 * <ul>
+	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
+	 * use the value returned by {@link Ordered#getOrder()}.</li>
+	 * <li>Otherwise use the value returned by {@link OrderUtils#getOrder(Class, int)}
+	 * with {@link Ordered#LOWEST_PRECEDENCE} used as the default order value.</li>
+	 * </ul>
+	 *
+	 * @see #resolveBean()
+	 */
+	@Override
+	public int getOrder() {
+		if (this.order == null) {
+			Object resolvedBean = resolveBean();
+			if (resolvedBean instanceof Ordered) {
+				this.order = ((Ordered) resolvedBean).getOrder();
+			} else if (this.beanType != null) {
+				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
+			} else {
+				this.order = Ordered.LOWEST_PRECEDENCE;
+			}
+		}
+		return this.order;
+	}
+
+	/**
+	 * Return the type of the contained bean.
+	 * <p>If the bean type is a CGLIB-generated class, the original user-defined
+	 * class is returned.
+	 */
+	@Nullable
+	public Class<?> getBeanType() {
+		return this.beanType;
+	}
+
+	/**
+	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
+	 * resolving the bean name through the {@link BeanFactory}.
+	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
+	 * will be cached, thereby avoiding repeated lookups in the {@code BeanFactory}.
+	 */
+	public Object resolveBean() {
+		if (this.resolvedBean == null) {
+			// this.beanOrName must be a String representing the bean name if
+			// this.resolvedBean is null.
+			this.resolvedBean = obtainBeanFactory().getBean((String) this.beanOrName);
+		}
+		return this.resolvedBean;
+	}
+
+	private BeanFactory obtainBeanFactory() {
+		Assert.state(this.beanFactory != null, "No BeanFactory set");
+		return this.beanFactory;
+	}
+
+	/**
+	 * Check whether the given bean type should be advised by this
+	 * {@code ControllerAdviceBean}.
+	 *
+	 * @param beanType the type of the bean to check
+	 * @see ControllerAdvice
+	 * @since 4.0
+	 */
+	public boolean isApplicableToBeanType(@Nullable Class<?> beanType) {
+		return this.beanTypePredicate.test(beanType);
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ControllerAdviceBean)) {
+			return false;
+		}
+		ControllerAdviceBean otherAdvice = (ControllerAdviceBean) other;
+		return (this.beanOrName.equals(otherAdvice.beanOrName) && this.beanFactory == otherAdvice.beanFactory);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.beanOrName.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.beanOrName.toString();
 	}
 
 }

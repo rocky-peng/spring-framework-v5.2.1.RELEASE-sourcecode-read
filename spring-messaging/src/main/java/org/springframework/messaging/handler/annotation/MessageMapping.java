@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.handler.annotation;
 
+import org.springframework.messaging.Message;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.messaging.Message;
 
 /**
  * Annotation for mapping a {@link Message} onto a message-handling method by
@@ -83,9 +83,9 @@ import org.springframework.messaging.Message;
  * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
  * @see org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
  * @see org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
+ * @since 4.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

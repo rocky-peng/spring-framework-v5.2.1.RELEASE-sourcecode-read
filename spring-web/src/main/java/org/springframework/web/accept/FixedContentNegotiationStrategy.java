@@ -16,12 +16,12 @@
 
 package org.springframework.web.accept;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A {@code ContentNegotiationStrategy} that returns a fixed content type.
@@ -46,6 +46,7 @@ public class FixedContentNegotiationStrategy implements ContentNegotiationStrate
 	 * for use in applications that support a variety of content types.
 	 * <p>Consider appending {@link MediaType#ALL} at the end if destinations
 	 * are present which do not support any of the other default media types.
+	 *
 	 * @since 5.0
 	 */
 	public FixedContentNegotiationStrategy(List<MediaType> contentTypes) {

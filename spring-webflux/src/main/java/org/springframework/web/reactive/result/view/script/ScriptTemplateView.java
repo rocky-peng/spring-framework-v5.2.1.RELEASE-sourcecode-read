@@ -16,22 +16,6 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -49,6 +33,20 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * An {@link AbstractUrlBasedView} subclass designed to run any template library
@@ -64,9 +62,9 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
- * @since 5.0
  * @see ScriptTemplateConfigurer
  * @see ScriptTemplateViewResolver
+ * @since 5.0
  */
 public class ScriptTemplateView extends AbstractUrlBasedView {
 
@@ -103,6 +101,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Constructor for use as a bean.
+	 *
 	 * @see #setUrl
 	 */
 	public ScriptTemplateView() {
@@ -115,16 +114,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		super(url);
 	}
 
-
-	/**
-	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
-	 */
-	public void setEngine(ScriptEngine engine) {
-		this.engine = engine;
-	}
-
 	/**
 	 * See {@link ScriptTemplateConfigurer#setEngineSupplier(Supplier)} documentation.
+	 *
 	 * @since 5.2
 	 */
 	public void setEngineSupplier(Supplier<ScriptEngine> engineSupplier) {
@@ -232,15 +224,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Assert.isTrue(this.engine == null,
 					"When 'sharedEngine' is set to false, you should specify the " +
-					"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
-		}
-		else if (this.engine != null) {
+							"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
+		} else if (this.engine != null) {
 			loadScripts(this.engine);
-		}
-		else if (this.engineName != null) {
+		} else if (this.engineName != null) {
 			setEngine(createEngineFromName(this.engineName));
-		}
-		else {
+		} else {
 			setEngine(createEngineFromSupplier());
 		}
 
@@ -254,15 +243,20 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			if (this.engineName != null) {
 				return createEngineFromName(this.engineName);
-			}
-			else {
+			} else {
 				return createEngineFromSupplier();
 			}
-		}
-		else {
+		} else {
 			Assert.state(this.engine != null, "No shared engine available");
 			return this.engine;
 		}
+	}
+
+	/**
+	 * See {@link ScriptTemplateConfigurer#setEngine(ScriptEngine)} documentation.
+	 */
+	public void setEngine(ScriptEngine engine) {
+		this.engine = engine;
 	}
 
 	protected ScriptEngine createEngineFromName(String engineName) {
@@ -297,8 +291,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				}
 				try {
 					engine.eval(new InputStreamReader(resource.getInputStream()));
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					throw new IllegalStateException("Failed to evaluate script [" + script + "]", ex);
 				}
 			}
@@ -322,8 +315,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
 					obtainApplicationContext(), ScriptTemplateConfig.class, true, false);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		} catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException("Expected a single ScriptTemplateConfig bean in the current " +
 					"web application context or the parent root context: ScriptTemplateConfigurer is " +
 					"the usual implementation. This bean may have any name.", ex);
@@ -351,8 +343,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				Function<String, String> templateLoader = path -> {
 					try {
 						return getTemplate(path);
-					}
-					catch (IOException ex) {
+					} catch (IOException ex) {
 						throw new IllegalStateException(ex);
 					}
 				};
@@ -367,22 +358,18 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					bindings.putAll(model);
 					model.put("renderingContext", context);
 					html = engine.eval(template, bindings);
-				}
-				else if (this.renderObject != null) {
+				} else if (this.renderObject != null) {
 					Object thiz = engine.eval(this.renderObject);
 					html = ((Invocable) engine).invokeMethod(thiz, this.renderFunction, template, model, context);
-				}
-				else {
+				} else {
 					html = ((Invocable) engine).invokeFunction(this.renderFunction, template, model, context);
 				}
 
 				byte[] bytes = String.valueOf(html).getBytes(StandardCharsets.UTF_8);
 				return exchange.getResponse().bufferFactory().wrap(bytes); // just wrapping, no allocation
-			}
-			catch (ScriptException ex) {
+			} catch (ScriptException ex) {
 				throw new IllegalStateException("Failed to render script template", new StandardScriptEvalException(ex));
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				throw new IllegalStateException("Failed to render script template", ex);
 			}
 		}));

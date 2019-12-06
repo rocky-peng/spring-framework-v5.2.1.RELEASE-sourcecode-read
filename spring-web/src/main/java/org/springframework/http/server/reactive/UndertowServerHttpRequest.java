@@ -16,22 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.net.ssl.SSLSession;
-
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
-import org.xnio.channels.StreamSourceChannel;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -45,6 +33,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.xnio.channels.StreamSourceChannel;
+import reactor.core.publisher.Flux;
+
+import javax.net.ssl.SSLSession;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Undertow {@link HttpServerExchange}.
@@ -128,6 +126,58 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return ObjectUtils.getIdentityHexString(this.exchange.getConnection());
 	}
 
+	private static class UndertowDataBuffer extends DataBufferWrapper implements PooledDataBuffer {
+
+		private final PooledByteBuffer pooledByteBuffer;
+
+		private final AtomicInteger refCount;
+
+
+		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
+			super(dataBuffer);
+			this.pooledByteBuffer = pooledByteBuffer;
+			this.refCount = new AtomicInteger(1);
+		}
+
+		private UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer,
+								   AtomicInteger refCount) {
+			super(dataBuffer);
+			this.refCount = refCount;
+			this.pooledByteBuffer = pooledByteBuffer;
+		}
+
+		@Override
+		public boolean isAllocated() {
+			return this.refCount.get() > 0;
+		}
+
+		@Override
+		public PooledDataBuffer retain() {
+			this.refCount.incrementAndGet();
+			DataBufferUtils.retain(dataBuffer());
+			return this;
+		}
+
+		@Override
+		public boolean release() {
+			int refCount = this.refCount.decrementAndGet();
+			if (refCount == 0) {
+				try {
+					return DataBufferUtils.release(dataBuffer());
+				} finally {
+					this.pooledByteBuffer.close();
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public DataBuffer slice(int index, int length) {
+			DataBuffer slice = dataBuffer().slice(index, length);
+			return new UndertowDataBuffer(slice, this.pooledByteBuffer, this.refCount);
+		}
+
+	}
 
 	private class RequestBodyPublisher extends AbstractListenerReadPublisher<DataBuffer> {
 
@@ -184,13 +234,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 					DataBuffer dataBuffer = this.bufferFactory.wrap(byteBuffer);
 					release = false;
 					return new UndertowDataBuffer(dataBuffer, pooledByteBuffer);
-				}
-				else if (read == -1) {
+				} else if (read == -1) {
 					onAllDataRead();
 				}
 				return null;
-			}
-			finally {
+			} finally {
 				if (release && pooledByteBuffer.isOpen()) {
 					pooledByteBuffer.close();
 				}
@@ -201,61 +249,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		protected void discardData() {
 			// Nothing to discard since we pass data buffers on immediately..
 		}
-	}
-
-
-	private static class UndertowDataBuffer extends DataBufferWrapper implements PooledDataBuffer {
-
-		private final PooledByteBuffer pooledByteBuffer;
-
-		private final AtomicInteger refCount;
-
-
-		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
-			super(dataBuffer);
-			this.pooledByteBuffer = pooledByteBuffer;
-			this.refCount = new AtomicInteger(1);
-		}
-
-		private UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer,
-				AtomicInteger refCount) {
-			super(dataBuffer);
-			this.refCount = refCount;
-			this.pooledByteBuffer = pooledByteBuffer;
-		}
-
-		@Override
-		public boolean isAllocated() {
-			return this.refCount.get() > 0;
-		}
-
-		@Override
-		public PooledDataBuffer retain() {
-			this.refCount.incrementAndGet();
-			DataBufferUtils.retain(dataBuffer());
-			return this;
-		}
-
-		@Override
-		public boolean release() {
-			int refCount = this.refCount.decrementAndGet();
-			if (refCount == 0) {
-				try {
-					return DataBufferUtils.release(dataBuffer());
-				}
-				finally {
-					this.pooledByteBuffer.close();
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			DataBuffer slice = dataBuffer().slice(index, length);
-			return new UndertowDataBuffer(slice, this.pooledByteBuffer, this.refCount);
-		}
-
 	}
 
 }

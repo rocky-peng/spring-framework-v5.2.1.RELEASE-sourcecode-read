@@ -16,18 +16,17 @@
 
 package org.springframework.web.server.handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * WebHandler decorator that invokes one or more {@link WebExceptionHandler WebExceptionHandlers}
@@ -43,6 +42,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 	/**
 	 * Create an {@code ExceptionHandlingWebHandler} for the given delegate.
+	 *
 	 * @param delegate the WebHandler delegate
 	 * @param handlers the WebExceptionHandlers to apply
 	 */
@@ -68,8 +68,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		Mono<Void> completion;
 		try {
 			completion = super.handle(exchange);
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			completion = Mono.error(ex);
 		}
 
@@ -84,8 +83,9 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	 * WebExceptionHandler to insert a checkpoint with current URL information.
 	 * Must be the first in order to ensure we catch the error signal before
 	 * the exception is handled and e.g. turned into an error response.
+	 *
 	 * @since 5.2
- 	 */
+	 */
 	private static class CheckpointInsertingHandler implements WebExceptionHandler {
 
 		@Override

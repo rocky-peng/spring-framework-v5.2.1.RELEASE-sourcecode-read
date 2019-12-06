@@ -16,14 +16,14 @@
 
 package org.springframework.messaging.handler;
 
+import org.springframework.lang.Nullable;
+import org.springframework.messaging.Message;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.util.Assert;
 
 /**
  * Composite {@link MessageCondition} that delegates to other message conditions.
@@ -97,7 +97,7 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 		checkCompatible(other);
 		List<MessageCondition<?>> otherConditions = other.getMessageConditions();
 		for (int i = 0; i < this.messageConditions.size(); i++) {
-			int result = compare (this.messageConditions.get(i), otherConditions.get(i), message);
+			int result = compare(this.messageConditions.get(i), otherConditions.get(i), message);
 			if (result != 0) {
 				return result;
 			}

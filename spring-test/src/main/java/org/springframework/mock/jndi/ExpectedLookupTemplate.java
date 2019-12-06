@@ -16,12 +16,11 @@
 
 package org.springframework.mock.jndi;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.jndi.JndiTemplate;
 
 import javax.naming.NamingException;
-
-import org.springframework.jndi.JndiTemplate;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simple extension of the JndiTemplate class that always returns a given object.
@@ -42,6 +41,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	/**
 	 * Construct a new JndiTemplate that will always return given objects for
 	 * given names. To be populated through {@code addObject} calls.
+	 *
 	 * @see #addObject(String, Object)
 	 */
 	public ExpectedLookupTemplate() {
@@ -50,7 +50,8 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	/**
 	 * Construct a new JndiTemplate that will always return the given object,
 	 * but honour only requests for the given name.
-	 * @param name the name the client is expected to look up
+	 *
+	 * @param name   the name the client is expected to look up
 	 * @param object the object that will be returned
 	 */
 	public ExpectedLookupTemplate(String name, Object object) {
@@ -60,7 +61,8 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 
 	/**
 	 * Add the given object to the list of JNDI objects that this template will expose.
-	 * @param name the name the client is expected to look up
+	 *
+	 * @param name   the name the client is expected to look up
 	 * @param object the object that will be returned
 	 */
 	public void addObject(String name, Object object) {

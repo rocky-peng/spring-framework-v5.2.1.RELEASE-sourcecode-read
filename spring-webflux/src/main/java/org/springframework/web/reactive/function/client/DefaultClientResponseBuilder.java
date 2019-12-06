@@ -16,12 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
-
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -35,6 +29,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 /**
  * Default implementation of {@link ClientResponse.Builder}.
@@ -63,16 +62,10 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 			return HttpHeaders.EMPTY;
 		}
 	};
-
-
-	private ExchangeStrategies strategies;
-
-	private int statusCode = 200;
-
 	private final HttpHeaders headers = new HttpHeaders();
-
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
-
+	private ExchangeStrategies strategies;
+	private int statusCode = 200;
 	private Flux<DataBuffer> body = Flux.empty();
 
 	private HttpRequest request;
@@ -92,8 +85,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		cookies(cookies -> cookies.addAll(other.cookies()));
 		if (other instanceof DefaultClientResponse) {
 			this.request = ((DefaultClientResponse) other).request();
-		}
-		else {
+		} else {
 			this.request = EMPTY_REQUEST;
 		}
 	}
@@ -193,7 +185,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		private final Flux<DataBuffer> body;
 
 		public BuiltClientHttpResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
+									   MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
 
 			this.statusCode = statusCode;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);

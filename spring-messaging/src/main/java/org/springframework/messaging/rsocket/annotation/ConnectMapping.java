@@ -16,13 +16,13 @@
 
 package org.springframework.messaging.rsocket.annotation;
 
+import io.rsocket.ConnectionSetupPayload;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import io.rsocket.ConnectionSetupPayload;
 
 /**
  * Annotation to map the initial {@link ConnectionSetupPayload} and subsequent

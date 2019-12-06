@@ -16,12 +16,6 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
@@ -63,6 +57,12 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides essential configuration for handling messages with simple messaging
@@ -116,17 +116,15 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected AbstractMessageBrokerConfiguration() {
 	}
 
-
-	@Override
-	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 	@Nullable
 	public ApplicationContext getApplicationContext() {
 		return this.applicationContext;
 	}
 
+	@Override
+	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
 	@Bean
 	public AbstractSubscribableChannel clientInboundChannel() {
@@ -217,8 +215,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		ThreadPoolTaskExecutor executor;
 		if (reg.hasTaskExecutor()) {
 			executor = reg.taskExecutor().getTaskExecutor();
-		}
-		else {
+		} else {
 			// Should never be used
 			executor = new ThreadPoolTaskExecutor();
 			executor.setCorePoolSize(0);
@@ -284,6 +281,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Protected method for plugging in a custom subclass of
 	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
 	 * SimpAnnotationMethodMessageHandler}.
+	 *
 	 * @since 4.2
 	 */
 	protected SimpAnnotationMethodMessageHandler createAnnotationMethodMessageHandler() {
@@ -405,6 +403,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	/**
 	 * Override this method to add custom message converters.
+	 *
 	 * @param messageConverters the list to add converters to, initially empty
 	 * @return {@code true} if default message converters should be added to list,
 	 * {@code false} if no more converters should be added
@@ -436,6 +435,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	/**
 	 * Create the user registry that provides access to local users.
+	 *
 	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
 	 */
 	@Deprecated
@@ -446,6 +446,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	/**
 	 * Create the user registry that provides access to local users.
+	 *
 	 * @param order the order to use as a {@link SmartApplicationListener}.
 	 * @since 5.1
 	 */
@@ -469,24 +470,22 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (validator == null) {
 			if (this.applicationContext != null && this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
-			}
-			else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+			} else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				Class<?> clazz;
 				try {
 					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
 				validator = (Validator) BeanUtils.instantiateClass(clazz);
-			}
-			else {
+			} else {
 				validator = new Validator() {
 					@Override
 					public boolean supports(Class<?> clazz) {
 						return false;
 					}
+
 					@Override
 					public void validate(@Nullable Object target, Errors errors) {
 					}
@@ -498,6 +497,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	/**
 	 * Override this method to provide a custom {@link Validator}.
+	 *
 	 * @since 4.0.1
 	 */
 	@Nullable

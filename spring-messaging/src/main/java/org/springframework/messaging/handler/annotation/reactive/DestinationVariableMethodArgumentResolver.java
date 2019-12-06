@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.handler.annotation.reactive;
 
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
@@ -28,6 +26,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.ValueConstants;
 import org.springframework.util.Assert;
 
+import java.util.Map;
+
 /**
  * Resolve for {@link DestinationVariable @DestinationVariable} method parameters.
  *
@@ -36,7 +36,9 @@ import org.springframework.util.Assert;
  */
 public class DestinationVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	/** The name of the header used to for template variables. */
+	/**
+	 * The name of the header used to for template variables.
+	 */
 	public static final String DESTINATION_TEMPLATE_VARIABLES_HEADER =
 			DestinationVariableMethodArgumentResolver.class.getSimpleName() + ".templateVariables";
 

@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
@@ -75,7 +74,6 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * <p><strong>NOTE:</strong> This class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
- * @since 2.5
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
@@ -87,11 +85,12 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * @see EventPublishingTestExecutionListener
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
+ * @since 2.5
  */
 @RunWith(SpringRunner.class)
-@TestExecutionListeners({ ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-	DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	EventPublishingTestExecutionListener.class })
+@TestExecutionListeners({ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+		EventPublishingTestExecutionListener.class})
 public abstract class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
 	/**
@@ -110,6 +109,7 @@ public abstract class AbstractJUnit4SpringContextTests implements ApplicationCon
 	/**
 	 * Set the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
+	 *
 	 * @param applicationContext the ApplicationContext that this test runs in
 	 */
 	@Override

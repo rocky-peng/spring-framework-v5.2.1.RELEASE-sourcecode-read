@@ -16,16 +16,6 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
@@ -33,8 +23,6 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.Version;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -50,6 +38,17 @@ import org.springframework.util.MimeType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.reactive.result.view.RequestContext;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A {@code View} implementation that uses the FreeMarker template engine.
@@ -76,8 +75,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * available to Spring's macros &mdash; for example, for creating
 	 * {@link org.springframework.web.reactive.result.view.BindStatus BindStatus}
 	 * objects.
-	 * @since 5.2
+	 *
 	 * @see #setExposeSpringMacroHelpers(boolean)
+	 * @since 5.2
 	 */
 	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
 
@@ -90,6 +90,13 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 
 	private boolean exposeSpringMacroHelpers = true;
 
+	/**
+	 * Get the FreeMarker {@link Configuration} used by this view.
+	 */
+	@Nullable
+	protected Configuration getConfiguration() {
+		return this.configuration;
+	}
 
 	/**
 	 * Set the FreeMarker {@link Configuration} to be used by this view.
@@ -102,15 +109,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Get the FreeMarker {@link Configuration} used by this view.
-	 */
-	@Nullable
-	protected Configuration getConfiguration() {
-		return this.configuration;
-	}
-
-	/**
 	 * Obtain the FreeMarker {@link Configuration} for actual use.
+	 *
 	 * @return the FreeMarker configuration (never {@code null})
 	 * @throws IllegalStateException in case of no {@code Configuration} object set
 	 * @see #getConfiguration()
@@ -119,6 +119,14 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		Configuration configuration = getConfiguration();
 		Assert.state(configuration != null, "No Configuration set");
 		return configuration;
+	}
+
+	/**
+	 * Get the encoding for the FreeMarker template.
+	 */
+	@Nullable
+	protected String getEncoding() {
+		return this.encoding;
 	}
 
 	/**
@@ -133,22 +141,15 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Get the encoding for the FreeMarker template.
-	 */
-	@Nullable
-	protected String getEncoding() {
-		return this.encoding;
-	}
-
-	/**
 	 * Set whether to expose a {@link RequestContext} for use by Spring's macro
 	 * library, under the name {@value #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE}.
 	 * <p>Default is {@code true}.
 	 * <p>Needed for Spring's FreeMarker default macros. Note that this is
 	 * <i>not</i> required for templates that use HTML forms <i>unless</i> you
 	 * wish to take advantage of the Spring helper macros.
-	 * @since 5.2
+	 *
 	 * @see #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE
+	 * @since 5.2
 	 */
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
 		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
@@ -166,6 +167,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 
 	/**
 	 * Autodetect a {@link FreeMarkerConfig} object in the {@code ApplicationContext}.
+	 *
 	 * @return the {@code FreeMarkerConfig} instance to use for this view
 	 * @throws BeansException if no {@code FreeMarkerConfig} instance could be found
 	 * @see #setConfiguration
@@ -174,8 +176,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		try {
 			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
 					obtainApplicationContext(), FreeMarkerConfig.class, true, false);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
+		} catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException(
 					"Must define a single FreeMarkerConfig bean in this application context " +
 							"(may be inherited): FreeMarkerConfigurer is the usual implementation. " +
@@ -195,16 +196,13 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			// Check that we can get the template, even if we might subsequently get it again.
 			getTemplate(locale);
 			return true;
-		}
-		catch (FileNotFoundException ex) {
+		} catch (FileNotFoundException ex) {
 			// Allow for ViewResolver chaining...
 			return false;
-		}
-		catch (ParseException ex) {
+		} catch (ParseException ex) {
 			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
-		}
-		catch (IOException ex) {
+					"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex);
+		} catch (IOException ex) {
 			throw new ApplicationContextException(
 					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
@@ -214,9 +212,10 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * Prepare the model to use for rendering by potentially exposing a
 	 * {@link RequestContext} for use in Spring FreeMarker macros and then
 	 * delegating to the inherited implementation of this method.
-	 * @since 5.2
+	 *
 	 * @see #setExposeSpringMacroHelpers(boolean)
 	 * @see org.springframework.web.reactive.result.view.AbstractView#getModelAttributes(Map, ServerWebExchange)
+	 * @since 5.2
 	 */
 	@Override
 	protected Mono<Map<String, Object>> getModelAttributes(
@@ -226,7 +225,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			if (model != null && model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
 				throw new IllegalStateException(
 						"Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
-						"' because of an existing model object of the same name");
+								"' because of an existing model object of the same name");
 			}
 			// Make a defensive copy of the model.
 			Map<String, Object> attributes = (model != null ? new HashMap<>(model) : new HashMap<>());
@@ -240,7 +239,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 
 	@Override
 	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes,
-			@Nullable MediaType contentType, ServerWebExchange exchange) {
+										@Nullable MediaType contentType, ServerWebExchange exchange) {
 
 		return exchange.getResponse().writeWith(Mono
 				.fromCallable(() -> {
@@ -258,13 +257,11 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 						Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
 						getTemplate(locale).process(freeMarkerModel, writer);
 						return dataBuffer;
-					}
-					catch (IOException ex) {
+					} catch (IOException ex) {
 						DataBufferUtils.release(dataBuffer);
 						String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
 						throw new IllegalStateException(message, ex);
-					}
-					catch (Throwable ex) {
+					} catch (Throwable ex) {
 						DataBufferUtils.release(dataBuffer);
 						throw ex;
 					}
@@ -279,7 +276,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Build a FreeMarker template model for the given model map.
 	 * <p>The default implementation builds a {@link SimpleHash}.
-	 * @param model the model to use for rendering
+	 *
+	 * @param model    the model to use for rendering
 	 * @param exchange current exchange
 	 * @return the FreeMarker template model, as a {@link SimpleHash} or subclass thereof
 	 */
@@ -292,6 +290,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Get the configured FreeMarker {@link ObjectWrapper}, or the
 	 * {@linkplain ObjectWrapper#DEFAULT_WRAPPER default wrapper} if none specified.
+	 *
 	 * @see freemarker.template.Configuration#getObjectWrapper()
 	 */
 	protected ObjectWrapper getObjectWrapper() {
@@ -303,6 +302,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	/**
 	 * Get the FreeMarker template for the given locale, to be rendered by this view.
 	 * <p>By default, the template specified by the "url" bean property will be retrieved.
+	 *
 	 * @param locale the current locale
 	 * @return the FreeMarker template to render
 	 */
