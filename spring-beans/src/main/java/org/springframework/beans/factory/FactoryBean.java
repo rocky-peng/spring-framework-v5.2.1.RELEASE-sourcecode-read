@@ -133,6 +133,9 @@ public interface FactoryBean<T> {
 	 * <p>The default implementation returns {@code true}, since a
 	 * {@code FactoryBean} typically manages a singleton instance.
 	 * @return whether the exposed object is a singleton
+	 *
+	 * 暴露的对象是否为单例
+	 *
 	 * @see #getObject()
 	 * @see SmartFactoryBean#isPrototype()
 	 */

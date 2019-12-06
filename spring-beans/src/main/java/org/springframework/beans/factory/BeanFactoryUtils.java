@@ -56,6 +56,13 @@ public abstract class BeanFactoryUtils {
 	 * Cache from name with factory bean prefix to stripped name without dereference.
 	 * @since 5.1
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 *
+	 * key：带有&前缀的,&可以多个   value: 删除&前缀后的字符串，比如：
+	 *
+	 * key------------->value
+	 * &&rocky			rocky
+	 * &userDao			userDao
+	 * &&&userService	userService
 	 */
 	private static final Map<String, String> transformedBeanNameCache = new ConcurrentHashMap<>();
 
@@ -66,6 +73,8 @@ public abstract class BeanFactoryUtils {
 	 * @param name the name of the bean
 	 * @return whether the given name is a factory dereference
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 *
+	 * 判断name是否是工厂地址（即带有&前缀的）
 	 */
 	public static boolean isFactoryDereference(@Nullable String name) {
 		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
@@ -77,6 +86,11 @@ public abstract class BeanFactoryUtils {
 	 * @param name the name of the bean
 	 * @return the transformed name
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 *
+	 * input		output
+	 * &xx			xx
+	 * &&xxx		xxx
+	 *
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");

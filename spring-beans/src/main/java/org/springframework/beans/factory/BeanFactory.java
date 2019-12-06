@@ -168,6 +168,8 @@ public interface BeanFactory {
 	 * the affected bean isn't a prototype
 	 * @throws BeansException if the bean could not be created
 	 * @since 2.5
+	 *
+	 * 仅在创建新实例的时候才会使用，不适用于在检索已有实例的时候
 	 */
 	Object getBean(String name, Object... args) throws BeansException;
 

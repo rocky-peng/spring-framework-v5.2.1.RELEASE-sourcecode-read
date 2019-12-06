@@ -229,19 +229,23 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return an instance, which may be shared or independent, of the specified bean.
-	 * @param name the name of the bean to retrieve
+	 * @param name the name of the bean to retrieve.
+	 *             1. bean的id，比如userDao
+	 *             2. 带有&前缀，比如 &userDao
+	 *             3. bean的别名	比如 userDaoAlias
 	 * @param requiredType the required type of the bean to retrieve
 	 * @param args arguments to use when creating a bean instance using explicit arguments
 	 * (only applied when creating a new instance as opposed to retrieving an existing one)
-	 * @param typeCheckOnly whether the instance is obtained for a type check,
-	 * not for actual use
+	 * @param typeCheckOnly whether the instance is obtained for a type check, not for actual use
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
+	 *
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
 
+		//这行代码执行后beanName不会带有&前缀，并且也不会是别名
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -1768,11 +1772,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
-	 * Get the object for the given bean instance, either the bean
-	 * instance itself or its created object in case of a FactoryBean.
+	 * Get the object for the given bean instance, either the bean instance itself or its created object in case of a FactoryBean.
+	 *
+	 *
 	 * @param beanInstance the shared bean instance
 	 * @param name name that may include factory dereference prefix
 	 * @param beanName the canonical bean name
+	 *                 规范的bean名称，就是bean的id，不是bean的别名
 	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
 	 */
