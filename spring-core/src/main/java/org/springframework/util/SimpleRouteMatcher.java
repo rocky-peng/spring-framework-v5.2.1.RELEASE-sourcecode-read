@@ -16,10 +16,10 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.util.Comparator;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@code RouteMatcher} that delegates to a {@link PathMatcher}.

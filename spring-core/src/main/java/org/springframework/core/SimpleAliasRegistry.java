@@ -46,7 +46,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	/**
 	 * Map from alias to canonical name.
-	 *
+	 * <p>
 	 * key:alias  value:name
 	 */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
@@ -225,10 +225,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * a	d
 	 * d	e
 	 * f	n
-	 *
+	 * <p>
 	 * 输入c,返回e
 	 * 输入f,返回n
-	 *
 	 */
 	public String canonicalName(String name) {
 		String canonicalName = name;

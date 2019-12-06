@@ -16,6 +16,12 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
@@ -24,23 +30,17 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
  * <em>synthesized</em> (i.e. wrapped in a dynamic proxy) with additional
  * functionality such as attribute alias handling.
  *
+ * @param <A> the annotation type
  * @author Sam Brannen
  * @author Phillip Webb
- * @since 5.2
- * @param <A> the annotation type
  * @see Annotation
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
+ * @since 5.2
  */
 final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> implements InvocationHandler {
 
@@ -66,6 +66,22 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
+		ClassLoader classLoader = type.getClassLoader();
+		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
+		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
+				new Class<?>[]{type, SynthesizedAnnotation.class} : new Class<?>[]{type};
+		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
+	}
+
+	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
+		try {
+			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
+		} catch (ClassNotFoundException ex) {
+			return false;
+		}
+	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
@@ -94,6 +110,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 
 	/**
 	 * See {@link Annotation#equals(Object)} for a definition of the required algorithm.
+	 *
 	 * @param other the other object to compare against
 	 */
 	private boolean annotationEquals(Object other) {
@@ -175,24 +192,6 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		return this.annotation.getValue(name, type).orElseThrow(
 				() -> new NoSuchElementException("No value found for attribute named '" + name +
 						"' in merged annotation " + this.annotation.getType().getName()));
-	}
-
-	@SuppressWarnings("unchecked")
-	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
-		ClassLoader classLoader = type.getClassLoader();
-		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
-		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
-				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
-		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
-	}
-
-	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
-		try {
-			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
-		}
-		catch (ClassNotFoundException ex) {
-			return false;
-		}
 	}
 
 }

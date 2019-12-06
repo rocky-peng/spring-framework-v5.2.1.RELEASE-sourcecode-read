@@ -18,7 +18,6 @@ package org.springframework.core.annotation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,6 +36,7 @@ enum IntrospectionFailureLogger {
 		public boolean isEnabled() {
 			return getLogger().isDebugEnabled();
 		}
+
 		@Override
 		public void log(String message) {
 			getLogger().debug(message);
@@ -48,6 +48,7 @@ enum IntrospectionFailureLogger {
 		public boolean isEnabled() {
 			return getLogger().isInfoEnabled();
 		}
+
 		@Override
 		public void log(String message) {
 			getLogger().info(message);
@@ -58,6 +59,14 @@ enum IntrospectionFailureLogger {
 	@Nullable
 	private static Log logger;
 
+	private static Log getLogger() {
+		Log logger = IntrospectionFailureLogger.logger;
+		if (logger == null) {
+			logger = LogFactory.getLog(MergedAnnotation.class);
+			IntrospectionFailureLogger.logger = logger;
+		}
+		return logger;
+	}
 
 	void log(String message, @Nullable Object source, Exception ex) {
 		String on = (source != null ? " on " + source : "");
@@ -67,15 +76,5 @@ enum IntrospectionFailureLogger {
 	abstract boolean isEnabled();
 
 	abstract void log(String message);
-
-
-	private static Log getLogger() {
-		Log logger = IntrospectionFailureLogger.logger;
-		if (logger == null) {
-			logger = LogFactory.getLog(MergedAnnotation.class);
-			IntrospectionFailureLogger.logger = logger;
-		}
-		return logger;
-	}
 
 }

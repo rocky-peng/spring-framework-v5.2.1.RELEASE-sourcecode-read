@@ -16,14 +16,14 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
+
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of
@@ -39,10 +39,10 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @author Oliver Gierke
  * @author Stephane Nicoll
- * @since 2.0.1
  * @see org.springframework.core.Ordered
  * @see org.springframework.core.annotation.Order
  * @see javax.annotation.Priority
+ * @since 2.0.1
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
@@ -51,6 +51,50 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 */
 	public static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
+	/**
+	 * Sort the given list with a default {@link AnnotationAwareOrderComparator}.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 *
+	 * @param list the List to sort
+	 * @see java.util.List#sort(java.util.Comparator)
+	 */
+	public static void sort(List<?> list) {
+		if (list.size() > 1) {
+			list.sort(INSTANCE);
+		}
+	}
+
+	/**
+	 * Sort the given array with a default AnnotationAwareOrderComparator.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 *
+	 * @param array the array to sort
+	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
+	 */
+	public static void sort(Object[] array) {
+		if (array.length > 1) {
+			Arrays.sort(array, INSTANCE);
+		}
+	}
+
+	/**
+	 * Sort the given array or List with a default AnnotationAwareOrderComparator,
+	 * if necessary. Simply skips sorting when given any other value.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 *
+	 * @param value the array or List to sort
+	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
+	 */
+	public static void sortIfNecessary(Object value) {
+		if (value instanceof Object[]) {
+			sort((Object[]) value);
+		} else if (value instanceof List) {
+			sort((List<?>) value);
+		}
+	}
 
 	/**
 	 * This implementation checks for {@link Order @Order} or
@@ -92,54 +136,10 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			return OrderUtils.getPriority((Class<?>) obj);
 		}
 		Integer priority = OrderUtils.getPriority(obj.getClass());
-		if (priority == null  && obj instanceof DecoratingProxy) {
+		if (priority == null && obj instanceof DecoratingProxy) {
 			return getPriority(((DecoratingProxy) obj).getDecoratedClass());
 		}
 		return priority;
-	}
-
-
-	/**
-	 * Sort the given list with a default {@link AnnotationAwareOrderComparator}.
-	 * <p>Optimized to skip sorting for lists with size 0 or 1,
-	 * in order to avoid unnecessary array extraction.
-	 * @param list the List to sort
-	 * @see java.util.List#sort(java.util.Comparator)
-	 */
-	public static void sort(List<?> list) {
-		if (list.size() > 1) {
-			list.sort(INSTANCE);
-		}
-	}
-
-	/**
-	 * Sort the given array with a default AnnotationAwareOrderComparator.
-	 * <p>Optimized to skip sorting for lists with size 0 or 1,
-	 * in order to avoid unnecessary array extraction.
-	 * @param array the array to sort
-	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
-	 */
-	public static void sort(Object[] array) {
-		if (array.length > 1) {
-			Arrays.sort(array, INSTANCE);
-		}
-	}
-
-	/**
-	 * Sort the given array or List with a default AnnotationAwareOrderComparator,
-	 * if necessary. Simply skips sorting when given any other value.
-	 * <p>Optimized to skip sorting for lists with size 0 or 1,
-	 * in order to avoid unnecessary array extraction.
-	 * @param value the array or List to sort
-	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
-	 */
-	public static void sortIfNecessary(Object value) {
-		if (value instanceof Object[]) {
-			sort((Object[]) value);
-		}
-		else if (value instanceof List) {
-			sort((List<?>) value);
-		}
 	}
 
 }

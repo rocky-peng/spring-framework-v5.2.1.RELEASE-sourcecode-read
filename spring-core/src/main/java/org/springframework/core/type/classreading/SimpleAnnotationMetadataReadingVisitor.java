@@ -16,11 +16,6 @@
 
 package org.springframework.core.type.classreading;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.MethodVisitor;
@@ -33,6 +28,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * ASM class visitor that creates {@link SimpleAnnotationMetadata}.
@@ -80,7 +80,7 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	@Override
 	public void visit(int version, int access, String name, String signature,
-			@Nullable String supername, String[] interfaces) {
+					  @Nullable String supername, String[] interfaces) {
 
 		this.className = toClassName(name);
 		this.access = access;
@@ -100,15 +100,14 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	@Override
 	public void visitInnerClass(String name, @Nullable String outerName, String innerName,
-			int access) {
+								int access) {
 		if (outerName != null) {
 			String className = toClassName(name);
 			String outerClassName = toClassName(outerName);
 			if (this.className.equals(className)) {
 				this.enclosingClassName = outerClassName;
 				this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
-			}
-			else if (this.className.equals(outerClassName)) {
+			} else if (this.className.equals(outerClassName)) {
 				this.memberClassNames.add(className);
 			}
 		}

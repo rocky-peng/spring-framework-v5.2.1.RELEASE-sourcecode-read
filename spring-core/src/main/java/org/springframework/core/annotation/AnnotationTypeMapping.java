@@ -16,6 +16,12 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,20 +36,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
-
 /**
  * Provides mapping information for a single annotation (or meta-annotation) in
  * the context of a root annotation type.
  *
  * @author Phillip Webb
  * @author Sam Brannen
- * @since 5.2
  * @see AnnotationTypeMappings
+ * @since 5.2
  */
 final class AnnotationTypeMapping {
 
@@ -83,7 +83,7 @@ final class AnnotationTypeMapping {
 
 
 	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source,
-			Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+						  Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
 
 		this.source = source;
 		this.root = (source != null ? source.getRoot() : this);
@@ -116,6 +116,66 @@ final class AnnotationTypeMapping {
 		return Collections.unmodifiableList(merged);
 	}
 
+	private static int[] filledIntArray(int size) {
+		int[] array = new int[size];
+		Arrays.fill(array, -1);
+		return array;
+	}
+
+	private static boolean isEquivalentToDefaultValue(Method attribute, Object value,
+													  BiFunction<Method, Object, Object> valueExtractor) {
+
+		return areEquivalent(attribute.getDefaultValue(), value, valueExtractor);
+	}
+
+	private static boolean areEquivalent(@Nullable Object value, @Nullable Object extractedValue,
+										 BiFunction<Method, Object, Object> valueExtractor) {
+
+		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
+			return true;
+		}
+		if (value instanceof Class && extractedValue instanceof String) {
+			return areEquivalent((Class<?>) value, (String) extractedValue);
+		}
+		if (value instanceof Class[] && extractedValue instanceof String[]) {
+			return areEquivalent((Class[]) value, (String[]) extractedValue);
+		}
+		if (value instanceof Annotation) {
+			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
+		}
+		return false;
+	}
+
+	private static boolean areEquivalent(Class<?>[] value, String[] extractedValue) {
+		if (value.length != extractedValue.length) {
+			return false;
+		}
+		for (int i = 0; i < value.length; i++) {
+			if (!areEquivalent(value[i], extractedValue[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean areEquivalent(Class<?> value, String extractedValue) {
+		return value.getName().equals(extractedValue);
+	}
+
+	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
+										 BiFunction<Method, Object, Object> valueExtractor) {
+
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		for (int i = 0; i < attributes.size(); i++) {
+			Method attribute = attributes.get(i);
+			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
+					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private Map<Method, List<Method>> resolveAliasedForTargets() {
 		Map<Method, List<Method>> aliasedBy = new HashMap<>();
 		for (int i = 0; i < this.attributes.size(); i++) {
@@ -137,7 +197,7 @@ final class AnnotationTypeMapping {
 		if (StringUtils.hasText(aliasFor.value()) && StringUtils.hasText(aliasFor.attribute())) {
 			throw new AnnotationConfigurationException(String.format(
 					"In @AliasFor declared on %s, attribute 'attribute' and its alias 'value' " +
-					"are present with values of '%s' and '%s', but only one is permitted.",
+							"are present with values of '%s' and '%s', but only one is permitted.",
 					AttributeMethods.describe(attribute), aliasFor.attribute(),
 					aliasFor.value()));
 		}
@@ -167,7 +227,7 @@ final class AnnotationTypeMapping {
 		if (target.equals(attribute)) {
 			throw new AnnotationConfigurationException(String.format(
 					"@AliasFor declaration on %s points to itself. " +
-					"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
+							"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
 					AttributeMethods.describe(attribute)));
 		}
 		if (!isCompatibleReturnType(attribute.getReturnType(), target.getReturnType())) {
@@ -300,7 +360,7 @@ final class AnnotationTypeMapping {
 	}
 
 	private boolean isBetterConventionAnnotationValue(int index, boolean isValueAttribute,
-			AnnotationTypeMapping mapping) {
+													  AnnotationTypeMapping mapping) {
 
 		if (this.annotationValueMappings[index] == -1) {
 			return true;
@@ -355,6 +415,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the root mapping.
+	 *
 	 * @return the root mapping
 	 */
 	AnnotationTypeMapping getRoot() {
@@ -363,6 +424,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the source of the mapping or {@code null}.
+	 *
 	 * @return the source of the mapping
 	 */
 	@Nullable
@@ -372,6 +434,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the distance of this mapping.
+	 *
 	 * @return the distance of the mapping
 	 */
 	int getDistance() {
@@ -380,6 +443,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the type of the mapped annotation.
+	 *
 	 * @return the annotation type
 	 */
 	Class<? extends Annotation> getAnnotationType() {
@@ -393,6 +457,7 @@ final class AnnotationTypeMapping {
 	/**
 	 * Get the source annotation for this mapping. This will be the
 	 * meta-annotation, or {@code null} if this is the root mapping.
+	 *
 	 * @return the source annotation of the mapping
 	 */
 	@Nullable
@@ -402,6 +467,7 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the annotation attributes for the mapping annotation type.
+	 *
 	 * @return the attribute methods
 	 */
 	AttributeMethods getAttributes() {
@@ -413,6 +479,7 @@ final class AnnotationTypeMapping {
 	 * there is no mapping. The resulting value is the index of the attribute on
 	 * the root annotation that can be invoked in order to obtain the actual
 	 * value.
+	 *
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @return the mapped attribute index or {@code -1}
 	 */
@@ -425,6 +492,7 @@ final class AnnotationTypeMapping {
 	 * if there is no mapping. The resulting value is the index of the attribute
 	 * on the root annotation that can be invoked in order to obtain the actual
 	 * value.
+	 *
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @return the mapped attribute index or {@code -1}
 	 */
@@ -438,10 +506,11 @@ final class AnnotationTypeMapping {
 	 * <p>The resulting value is obtained from the closest meta-annotation,
 	 * taking into consideration both convention and alias based mapping rules.
 	 * For root mappings, this method will always return {@code null}.
-	 * @param attributeIndex the attribute index of the source attribute
+	 *
+	 * @param attributeIndex      the attribute index of the source attribute
 	 * @param metaAnnotationsOnly if only meta annotations should be considered.
-	 * If this parameter is {@code false} then aliases within the annotation will
-	 * also be considered.
+	 *                            If this parameter is {@code false} then aliases within the annotation will
+	 *                            also be considered.
 	 * @return the mapped annotation value, or {@code null}
 	 */
 	@Nullable
@@ -460,14 +529,15 @@ final class AnnotationTypeMapping {
 	/**
 	 * Determine if the specified value is equivalent to the default value of the
 	 * attribute at the given index.
+	 *
 	 * @param attributeIndex the attribute index of the source attribute
-	 * @param value the value to check
+	 * @param value          the value to check
 	 * @param valueExtractor the value extractor used to extract values from any
-	 * nested annotations
+	 *                       nested annotations
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
 	boolean isEquivalentToDefaultValue(int attributeIndex, Object value,
-			BiFunction<Method, Object, Object> valueExtractor) {
+									   BiFunction<Method, Object, Object> valueExtractor) {
 
 		Method attribute = this.attributes.get(attributeIndex);
 		return isEquivalentToDefaultValue(attribute, value, valueExtractor);
@@ -475,73 +545,12 @@ final class AnnotationTypeMapping {
 
 	/**
 	 * Get the mirror sets for this type mapping.
+	 *
 	 * @return the mirrorSets the attribute mirror sets.
 	 */
 	MirrorSets getMirrorSets() {
 		return this.mirrorSets;
 	}
-
-
-	private static int[] filledIntArray(int size) {
-		int[] array = new int[size];
-		Arrays.fill(array, -1);
-		return array;
-	}
-
-	private static boolean isEquivalentToDefaultValue(Method attribute, Object value,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		return areEquivalent(attribute.getDefaultValue(), value, valueExtractor);
-	}
-
-	private static boolean areEquivalent(@Nullable Object value, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
-			return true;
-		}
-		if (value instanceof Class && extractedValue instanceof String) {
-			return areEquivalent((Class<?>) value, (String) extractedValue);
-		}
-		if (value instanceof Class[] && extractedValue instanceof String[]) {
-			return areEquivalent((Class[]) value, (String[]) extractedValue);
-		}
-		if (value instanceof Annotation) {
-			return areEquivalent((Annotation) value, extractedValue, valueExtractor);
-		}
-		return false;
-	}
-
-	private static boolean areEquivalent(Class<?>[] value, String[] extractedValue) {
-		if (value.length != extractedValue.length) {
-			return false;
-		}
-		for (int i = 0; i < value.length; i++) {
-			if (!areEquivalent(value[i], extractedValue[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private static boolean areEquivalent(Class<?> value, String extractedValue) {
-		return value.getName().equals(extractedValue);
-	}
-
-	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
-
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
-		for (int i = 0; i < attributes.size(); i++) {
-			Method attribute = attributes.get(i);
-			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
-					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 
 	/**
 	 * A collection of {@link MirrorSet} instances that provides details of all
@@ -549,9 +558,8 @@ final class AnnotationTypeMapping {
 	 */
 	class MirrorSets {
 
-		private MirrorSet[] mirrorSets;
-
 		private final MirrorSet[] assigned;
+		private MirrorSet[] mirrorSets;
 
 		MirrorSets() {
 			this.assigned = new MirrorSet[attributes.size()];
@@ -598,7 +606,7 @@ final class AnnotationTypeMapping {
 		}
 
 		int[] resolve(@Nullable Object source, @Nullable Object annotation,
-				BiFunction<Method, Object, Object> valueExtractor) {
+					  BiFunction<Method, Object, Object> valueExtractor) {
 
 			int[] result = new int[attributes.size()];
 			for (int i = 0; i < result.length; i++) {
@@ -620,9 +628,8 @@ final class AnnotationTypeMapping {
 		 */
 		class MirrorSet {
 
-			private int size;
-
 			private final int[] indexes = new int[attributes.size()];
+			private int size;
 
 			void update() {
 				this.size = 0;
@@ -636,7 +643,7 @@ final class AnnotationTypeMapping {
 			}
 
 			<A> int resolve(@Nullable Object source, @Nullable A annotation,
-					BiFunction<Method, Object, Object> valueExtractor) {
+							BiFunction<Method, Object, Object> valueExtractor) {
 
 				int result = -1;
 				Object lastValue = null;
@@ -653,7 +660,7 @@ final class AnnotationTypeMapping {
 						String on = (source != null) ? " declared on " + source : "";
 						throw new AnnotationConfigurationException(String.format(
 								"Different @AliasFor mirror values for annotation [%s]%s; attribute '%s' " +
-								"and its alias '%s' are declared with values of [%s] and [%s].",
+										"and its alias '%s' are declared with values of [%s] and [%s].",
 								getAnnotationType().getName(), on,
 								attributes.get(result).getName(),
 								attribute.getName(),

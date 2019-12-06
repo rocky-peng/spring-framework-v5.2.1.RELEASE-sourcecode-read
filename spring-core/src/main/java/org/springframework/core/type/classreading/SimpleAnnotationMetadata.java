@@ -16,15 +16,15 @@
 
 package org.springframework.core.type.classreading;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.asm.Opcodes;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * {@link AnnotationMetadata} created from a
@@ -60,8 +60,8 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 
 	SimpleAnnotationMetadata(String className, int access, @Nullable String enclosingClassName,
-			@Nullable String superClassName, boolean independentInnerClass, String[] interfaceNames,
-			String[] memberClassNames, MethodMetadata[] annotatedMethods, MergedAnnotations annotations) {
+							 @Nullable String superClassName, boolean independentInnerClass, String[] interfaceNames,
+							 String[] memberClassNames, MethodMetadata[] annotatedMethods, MergedAnnotations annotations) {
 
 		this.className = className;
 		this.access = access;
@@ -155,7 +155,6 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 	public MergedAnnotations getAnnotations() {
 		return this.annotations;
 	}
-
 
 
 }

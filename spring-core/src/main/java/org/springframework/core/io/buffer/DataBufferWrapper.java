@@ -16,13 +16,13 @@
 
 package org.springframework.core.io.buffer;
 
+import org.springframework.util.Assert;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.function.IntPredicate;
-
-import org.springframework.util.Assert;
 
 /**
  * Provides a convenient implementation of the {@link DataBuffer} interface
@@ -40,6 +40,7 @@ public class DataBufferWrapper implements DataBuffer {
 
 	/**
 	 * Create a new {@code DataBufferWrapper} that wraps the given buffer.
+	 *
 	 * @param delegate the buffer to wrap
 	 */
 	public DataBufferWrapper(DataBuffer delegate) {
@@ -161,7 +162,7 @@ public class DataBufferWrapper implements DataBuffer {
 
 	@Override
 	public DataBuffer write(CharSequence charSequence,
-			Charset charset) {
+							Charset charset) {
 		return this.delegate.write(charSequence, charset);
 	}
 

@@ -16,10 +16,6 @@
 
 package org.springframework.core.type.classreading;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.SpringAsmInfo;
@@ -27,6 +23,10 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * ASM method visitor that creates {@link SimpleMethodMetadata}.
@@ -56,7 +56,7 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 
 
 	SimpleMethodMetadataReadingVisitor(@Nullable ClassLoader classLoader, String declaringClassName,
-			int access, String name, String descriptor, Consumer<SimpleMethodMetadata> consumer) {
+									   int access, String name, String descriptor, Consumer<SimpleMethodMetadata> consumer) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;

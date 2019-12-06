@@ -16,16 +16,16 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Predicate implementations that provide various test operations for
@@ -44,7 +44,8 @@ public abstract class MergedAnnotationPredicates {
 	 * Create a new {@link Predicate} that evaluates to {@code true} if the name of the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
-	 * @param <A> the annotation type
+	 *
+	 * @param <A>       the annotation type
 	 * @param typeNames the names that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
@@ -56,7 +57,8 @@ public abstract class MergedAnnotationPredicates {
 	 * Create a new {@link Predicate} that evaluates to {@code true} if the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
-	 * @param <A> the annotation type
+	 *
+	 * @param <A>   the annotation type
 	 * @param types the types that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
@@ -68,7 +70,8 @@ public abstract class MergedAnnotationPredicates {
 	 * Create a new {@link Predicate} that evaluates to {@code true} if the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified collection.
-	 * @param <A> the annotation type
+	 *
+	 * @param <A>   the annotation type
 	 * @param types the type names or classes that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
@@ -88,6 +91,7 @@ public abstract class MergedAnnotationPredicates {
 	 * value changes, the predicate always returns {@code false}. For example,
 	 * if you have a set of annotations with distances {@code [1, 1, 2, 1]} then
 	 * only the first two will match.
+	 *
 	 * @param valueExtractor function used to extract the value to check
 	 * @return a {@link Predicate} that matches the first run of the extracted
 	 * values
@@ -103,8 +107,9 @@ public abstract class MergedAnnotationPredicates {
 	 * annotations that are unique based on the extracted key. For example
 	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::getType)} will
 	 * match the first time a unique type is encountered.
+	 *
 	 * @param keyExtractor function used to extract the key used to test for
-	 * uniqueness
+	 *                     uniqueness
 	 * @return a {@link Predicate} that matches a unique annotation based on the
 	 * extracted key
 	 */

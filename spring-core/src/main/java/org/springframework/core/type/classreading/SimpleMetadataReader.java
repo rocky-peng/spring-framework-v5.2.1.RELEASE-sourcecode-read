@@ -16,16 +16,16 @@
 
 package org.springframework.core.type.classreading;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.asm.ClassReader;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.lang.Nullable;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@link MetadataReader} implementation based on an ASM
@@ -56,8 +56,7 @@ final class SimpleMetadataReader implements MetadataReader {
 		try (InputStream is = new BufferedInputStream(resource.getInputStream())) {
 			try {
 				return new ClassReader(is);
-			}
-			catch (IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new NestedIOException("ASM ClassReader failed to parse class file - " +
 						"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
 			}

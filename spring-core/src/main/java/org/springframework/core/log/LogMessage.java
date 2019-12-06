@@ -16,10 +16,10 @@
 
 package org.springframework.core.log;
 
-import java.util.function.Supplier;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.function.Supplier;
 
 /**
  * A simple log message type for use with Commons Logging, allowing
@@ -28,7 +28,6 @@ import org.springframework.util.Assert;
  * format string ({@link String#format}) in its {@link #toString()}.
  *
  * @author Juergen Hoeller
- * @since 5.2
  * @see #of(Supplier)
  * @see #format(String, Object)
  * @see #format(String, Object...)
@@ -38,12 +37,83 @@ import org.springframework.util.Assert;
  * @see org.apache.commons.logging.Log#info(Object)
  * @see org.apache.commons.logging.Log#debug(Object)
  * @see org.apache.commons.logging.Log#trace(Object)
+ * @since 5.2
  */
 public abstract class LogMessage implements CharSequence {
 
 	@Nullable
 	private String result;
 
+	/**
+	 * Build a lazily resolving message from the given supplier.
+	 *
+	 * @param supplier the supplier (typically bound to a Java 8 lambda expression)
+	 * @see #toString()
+	 */
+	public static LogMessage of(Supplier<? extends CharSequence> supplier) {
+		return new SupplierMessage(supplier);
+	}
+
+	/**
+	 * Build a lazily formatted message from the given format string and argument.
+	 *
+	 * @param format the format string (following {@link String#format} rules)
+	 * @param arg1   the argument
+	 * @see String#format(String, Object...)
+	 */
+	public static LogMessage format(String format, Object arg1) {
+		return new FormatMessage1(format, arg1);
+	}
+
+	/**
+	 * Build a lazily formatted message from the given format string and arguments.
+	 *
+	 * @param format the format string (following {@link String#format} rules)
+	 * @param arg1   the first argument
+	 * @param arg2   the second argument
+	 * @see String#format(String, Object...)
+	 */
+	public static LogMessage format(String format, Object arg1, Object arg2) {
+		return new FormatMessage2(format, arg1, arg2);
+	}
+
+	/**
+	 * Build a lazily formatted message from the given format string and arguments.
+	 *
+	 * @param format the format string (following {@link String#format} rules)
+	 * @param arg1   the first argument
+	 * @param arg2   the second argument
+	 * @param arg3   the third argument
+	 * @see String#format(String, Object...)
+	 */
+	public static LogMessage format(String format, Object arg1, Object arg2, Object arg3) {
+		return new FormatMessage3(format, arg1, arg2, arg3);
+	}
+
+	/**
+	 * Build a lazily formatted message from the given format string and arguments.
+	 *
+	 * @param format the format string (following {@link String#format} rules)
+	 * @param arg1   the first argument
+	 * @param arg2   the second argument
+	 * @param arg3   the third argument
+	 * @param arg4   the fourth argument
+	 * @see String#format(String, Object...)
+	 */
+	public static LogMessage format(String format, Object arg1, Object arg2, Object arg3, Object arg4) {
+		return new FormatMessage4(format, arg1, arg2, arg3, arg4);
+	}
+
+	/**
+	 * Build a lazily formatted message from the given format string and varargs.
+	 *
+	 * @param format the format string (following {@link String#format} rules)
+	 * @param args   the varargs array (costly, prefer individual arguments)
+	 * @see String#format(String, Object...)
+	 */
+	public static LogMessage format(String format, Object... args) {
+		return new FormatMessageX(format, args);
+	}
 
 	@Override
 	public int length() {
@@ -73,73 +143,6 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 	abstract String buildString();
-
-
-	/**
-	 * Build a lazily resolving message from the given supplier.
-	 * @param supplier the supplier (typically bound to a Java 8 lambda expression)
-	 * @see #toString()
-	 */
-	public static LogMessage of(Supplier<? extends CharSequence> supplier) {
-		return new SupplierMessage(supplier);
-	}
-
-	/**
-	 * Build a lazily formatted message from the given format string and argument.
-	 * @param format the format string (following {@link String#format} rules)
-	 * @param arg1 the argument
-	 * @see String#format(String, Object...)
-	 */
-	public static LogMessage format(String format, Object arg1) {
-		return new FormatMessage1(format, arg1);
-	}
-
-	/**
-	 * Build a lazily formatted message from the given format string and arguments.
-	 * @param format the format string (following {@link String#format} rules)
-	 * @param arg1 the first argument
-	 * @param arg2 the second argument
-	 * @see String#format(String, Object...)
-	 */
-	public static LogMessage format(String format, Object arg1, Object arg2) {
-		return new FormatMessage2(format, arg1, arg2);
-	}
-
-	/**
-	 * Build a lazily formatted message from the given format string and arguments.
-	 * @param format the format string (following {@link String#format} rules)
-	 * @param arg1 the first argument
-	 * @param arg2 the second argument
-	 * @param arg3 the third argument
-	 * @see String#format(String, Object...)
-	 */
-	public static LogMessage format(String format, Object arg1, Object arg2, Object arg3) {
-		return new FormatMessage3(format, arg1, arg2, arg3);
-	}
-
-	/**
-	 * Build a lazily formatted message from the given format string and arguments.
-	 * @param format the format string (following {@link String#format} rules)
-	 * @param arg1 the first argument
-	 * @param arg2 the second argument
-	 * @param arg3 the third argument
-	 * @param arg4 the fourth argument
-	 * @see String#format(String, Object...)
-	 */
-	public static LogMessage format(String format, Object arg1, Object arg2, Object arg3, Object arg4) {
-		return new FormatMessage4(format, arg1, arg2, arg3, arg4);
-	}
-
-	/**
-	 * Build a lazily formatted message from the given format string and varargs.
-	 * @param format the format string (following {@link String#format} rules)
-	 * @param args the varargs array (costly, prefer individual arguments)
-	 * @see String#format(String, Object...)
-	 */
-	public static LogMessage format(String format, Object... args) {
-		return new FormatMessageX(format, args);
-	}
-
 
 	private static final class SupplierMessage extends LogMessage {
 

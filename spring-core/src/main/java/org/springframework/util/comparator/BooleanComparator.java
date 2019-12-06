@@ -16,10 +16,10 @@
 
 package org.springframework.util.comparator;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.util.Comparator;
-
-import org.springframework.lang.Nullable;
 
 /**
  * A {@link Comparator} for {@link Boolean} objects that can sort either
@@ -53,6 +53,7 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 	 * <p>Alternatively, you can use the default shared instances:
 	 * {@code BooleanComparator.TRUE_LOW} and
 	 * {@code BooleanComparator.TRUE_HIGH}.
+	 *
 	 * @param trueLow whether to treat true as lower or higher than false
 	 * @see #TRUE_LOW
 	 * @see #TRUE_HIGH
