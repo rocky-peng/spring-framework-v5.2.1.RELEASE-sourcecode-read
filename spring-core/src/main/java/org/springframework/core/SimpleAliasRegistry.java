@@ -228,6 +228,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 *
 	 * 输入c,返回e
 	 * 输入f,返回n
+	 *
 	 */
 	public String canonicalName(String name) {
 		String canonicalName = name;
