@@ -39,6 +39,10 @@ public interface StringValueResolver {
 	 * value), possibly the original String value itself (in case of no placeholders
 	 * to resolve or when ignoring unresolvable placeholders)
 	 * @throws IllegalArgumentException in case of an unresolvable String value
+	 *                                  <p>
+	 *                                  字符串解析器。
+	 *                                  输入：带有占位符的字符串		输出：解析占位符的值并返回解析后的字符串
+	 *                                  输入：不带占位符的字符串		输出：原样返回
 	 */
 	@Nullable
 	String resolveStringValue(String strVal);

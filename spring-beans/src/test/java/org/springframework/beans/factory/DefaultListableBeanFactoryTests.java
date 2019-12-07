@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -531,6 +532,8 @@ class DefaultListableBeanFactoryTests {
 		p.setProperty(PREFIX + "kerry.name", "Kerry");
 		p.setProperty(PREFIX + "kerry.age", "35");
 		p.setProperty(PREFIX + "kerry.spouse(ref)", "rod");
+
+		p.entrySet().forEach(objectObjectEntry -> System.out.println(objectObjectEntry.getKey()+ "------>" + objectObjectEntry.getValue()));
 
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertThat(count == 2).as("2 beans registered, not " + count).isTrue();

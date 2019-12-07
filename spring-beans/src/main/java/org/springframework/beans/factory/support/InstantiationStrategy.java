@@ -32,6 +32,8 @@ import java.lang.reflect.Method;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
+ * <p>
+ * 对象实例化的不同策略。采用了策略模式。   具体策略请查看实现类
  */
 public interface InstantiationStrategy {
 

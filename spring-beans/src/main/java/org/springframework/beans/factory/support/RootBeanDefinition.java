@@ -76,6 +76,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Package-visible field for caching the determined Class of a given bean definition.
+	 * <p>
+	 * 这个和父类中的beanClass字段貌似存的同一个Class对象。
 	 */
 	@Nullable
 	volatile Class<?> resolvedTargetType;
@@ -98,7 +100,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile Method factoryMethodToIntrospect;
 	/**
-	 * Package-visible field for caching the resolved constructor or factory method.
+	 * Package-visible field for caching the resolved constructor or factory method.、
+	 * <p>
+	 * 指向的是 Constructor实例 或者 Method实例
 	 */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
@@ -118,6 +122,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	Object[] preparedConstructorArguments;
 	/**
 	 * Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied.
+	 * <p>
+	 * 是否已经经过MergedBeanDefinitionPostProcessor处理了
 	 */
 	boolean postProcessed = false;
 	/**

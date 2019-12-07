@@ -31,6 +31,8 @@ import java.util.List;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
+ *
+ * SpEL相关的
  */
 public interface EvaluationContext {
 

@@ -140,6 +140,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 	/**
 	 * Names of beans that have already been created at least once.
+	 * <p>
+	 * 至少创建过一次的那些bean
 	 */
 	private final Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<>(256));
 	/**
@@ -149,6 +151,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			new NamedThreadLocal<>("Prototype beans currently in creation");
 	/**
 	 * Parent bean factory, for bean inheritance support.
+	 * <p>
+	 * 父工厂
 	 */
 	@Nullable
 	private BeanFactory parentBeanFactory;
@@ -164,33 +168,47 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private ClassLoader tempClassLoader;
 	/**
 	 * Whether to cache bean metadata or rather reobtain it for every access.
+	 * <p>
+	 * 是否缓存bean元数据
 	 */
 	private boolean cacheBeanMetadata = true;
 	/**
 	 * Resolution strategy for expressions in bean definition values.
+	 * <p>
+	 * 猜测是SpEL表达式相关的
 	 */
 	@Nullable
 	private BeanExpressionResolver beanExpressionResolver;
 	/**
 	 * Spring ConversionService to use instead of PropertyEditors.
+	 * <p>
+	 * Spring使用ConversionService来代替PropertyEditor
 	 */
 	@Nullable
 	private ConversionService conversionService;
 	/**
 	 * A custom TypeConverter to use, overriding the default PropertyEditor mechanism.
+	 * <p>
+	 * 使用自定义的TypeConverter来覆盖默认的PropertyEditor机制
 	 */
 	@Nullable
 	private TypeConverter typeConverter;
 	/**
 	 * Indicates whether any InstantiationAwareBeanPostProcessors have been registered.
+	 * <p>
+	 * 标记是否有注册过InstantiationAwareBeanPostProcessor实例
 	 */
 	private volatile boolean hasInstantiationAwareBeanPostProcessors;
 	/**
 	 * Indicates whether any DestructionAwareBeanPostProcessors have been registered.
+	 * <p>
+	 * 标记是否有注册过DestructionAwareBeanPostProcessor实例
 	 */
 	private volatile boolean hasDestructionAwareBeanPostProcessors;
 	/**
 	 * Security context used when running with a SecurityManager.
+	 * <p>
+	 * SecurityManager 这玩意一直没研究过
 	 */
 	@Nullable
 	private SecurityContextProvider securityContextProvider;
@@ -239,6 +257,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param requiredType the required type of the bean to retrieve
 	 * @param args         arguments to use when creating a bean instance using explicit arguments
 	 *                     (only applied when creating a new instance as opposed to retrieving an existing one)
+	 *                     仅在创建新实例的时候才会使用这个参数，检索现有实例的时候不会使用这个参数
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
@@ -258,6 +277,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param requiredType  the required type of the bean to retrieve
 	 * @param args          arguments to use when creating a bean instance using explicit arguments
 	 *                      (only applied when creating a new instance as opposed to retrieving an existing one)
+	 *                      仅在创建新实例的时候才会使用这个参数，检索现有实例的时候不会使用这个参数
 	 * @param typeCheckOnly whether the instance is obtained for a type check, not for actual use
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
@@ -266,7 +286,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 							  @Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
 
-		//这行代码执行后beanName不会带有&前缀，并且也不会是别名
+		//这行代码执行后beanName不会带有&前缀，也不会是别名
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -1704,6 +1724,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Mark the specified bean as already created (or about to be created).
 	 * <p>This allows the bean factory to optimize its caching for repeated
 	 * creation of the specified bean.
+	 * <p>
+	 * DCL的一个案例
 	 *
 	 * @param beanName the name of the bean
 	 */

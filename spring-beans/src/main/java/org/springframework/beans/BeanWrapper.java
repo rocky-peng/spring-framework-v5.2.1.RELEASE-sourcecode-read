@@ -45,6 +45,8 @@ import java.beans.PropertyDescriptor;
  * @see org.springframework.validation.BeanPropertyBindingResult
  * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
  * @since 13 April 2001
+ * <p>
+ * 这玩意拿来操纵对象字段的。比如set/get字段的值
  */
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 

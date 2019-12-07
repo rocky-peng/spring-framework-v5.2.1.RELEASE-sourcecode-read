@@ -146,6 +146,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public static final String INFER_METHOD = "(inferred)";
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
+
+	/**
+	 * 可能存字符串表示类名，经过加载后这个字段替换为对应的Class对象
+	 */
 	@Nullable
 	private volatile Object beanClass;
 	@Nullable
