@@ -72,28 +72,39 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Cache of singleton objects: bean name to bean instance.
+	 * <p>
+	 * 缓存已经创建好的bean实例
 	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/**
 	 * Cache of singleton factories: bean name to ObjectFactory.
+	 * <p>
+	 * 缓存正在创建中的bean实例 A
 	 */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/**
 	 * Cache of early singleton objects: bean name to bean instance.
+	 * <p>
+	 * 缓存正在创建中的bean实例 B
+	 * <p>
+	 * 正在创建中的实例，会先在B中找，如果则会从A中找到实例对应的ObjectFactory实例调用getObject对象，
+	 * 然后放到B中去，下次则直接从B中命中
 	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/**
 	 * Set of registered singletons, containing the bean names in registration order.
-	 * 存放这些实例的名字：
-	 * 1. 已经执行了构造方法，但还没有进行DI等操作的
+	 * <p>
+	 * 按照注册顺序存放这些实例的名字
 	 */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/**
 	 * Names of beans that are currently in creation.
+	 * <p>
+	 * 标记哪些实例正在创建中
 	 */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
@@ -113,10 +124,26 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
 	/**
 	 * Map between dependent bean names: bean name to Set of dependent bean names.
+	 * <p>
+	 * key 			value
+	 * a			[b,c,d]
+	 * b			[c,e]
+	 * 表示：
+	 * b c d三个实例都依赖了a实例
+	 * c,e两个实例依赖了b实例
 	 */
 	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
 	/**
 	 * Map between depending bean names: bean name to Set of bean names for the bean's dependencies.
+	 *
+	 * <p>
+	 * 和dependentBeanMap是相反的
+	 * key 			value
+	 * a			[b,c,d]
+	 * b			[c,e]
+	 * 表示：
+	 * a实例依赖了b c d三个实例
+	 * b实例依赖了c,e两个实例
 	 */
 	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 	/**
@@ -126,6 +153,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private Set<Exception> suppressedExceptions;
 	/**
 	 * Flag that indicates whether we're currently within destroySingletons.
+	 * <p>
+	 * 标记容器当前是否正在销毁单例
 	 */
 	private boolean singletonsCurrentlyInDestruction = false;
 
@@ -189,6 +218,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
+	 * 先从
 	 *
 	 * @param beanName            the name of the bean to look for
 	 * @param allowEarlyReference whether early references should be created or not
@@ -416,6 +446,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Register a dependent bean for the given bean,
 	 * to be destroyed before the given bean is destroyed.
+	 * <p>
+	 * 表示 containingBeanName 依赖了 containedBeanName
+	 * 也就是containingBeanName对象中存在对containedBeanName的引用
 	 *
 	 * @param containedBeanName  the name of the bean
 	 * @param containingBeanName the name of the dependent bean

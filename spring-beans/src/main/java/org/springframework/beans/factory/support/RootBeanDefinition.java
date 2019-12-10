@@ -64,6 +64,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	final Object postProcessingLock = new Object();
 	/**
 	 * Determines if the definition needs to be re-merged.
+	 *
+	 * stale陈旧的意思。标记这个definition实例是否需要重新合并
 	 */
 	volatile boolean stale;
 
@@ -102,7 +104,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Package-visible field for caching the resolved constructor or factory method.、
 	 * <p>
-	 * 指向的是 Constructor实例 或者 Method实例
+	 * 指向的是 Constructor实例 或者 Method实例，目的是为了缓存，下次使用的时候不用再次去解析
 	 */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
