@@ -68,6 +68,8 @@ public interface Ordered {
 	 * @return the order value
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE
+	 *
+	 * 越小优先级越高
 	 */
 	int getOrder();
 

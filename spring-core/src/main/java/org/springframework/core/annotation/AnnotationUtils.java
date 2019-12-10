@@ -117,8 +117,8 @@ public abstract class AnnotationUtils {
 
 
 	/**
-	 * Determine whether the given class is a candidate for carrying one of the specified
-	 * annotations (at type, method or field level).
+	 * Determine whether the given class is a candidate for carrying one of the specified annotations
+	 * (at type, method or field level).
 	 *
 	 * @param clazz           the class to introspect
 	 * @param annotationTypes the searchable annotation types

@@ -538,6 +538,8 @@ class DefaultListableBeanFactoryTests {
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertThat(count == 2).as("2 beans registered, not " + count).isTrue();
 
+		TestBean rod = lbf.getBean("rod", TestBean.class);
+
 		TestBean kerry = lbf.getBean("kerry", TestBean.class);
 		assertThat("Kerry".equals(kerry.getName())).as("Kerry name is Kerry").isTrue();
 		ITestBean spouse = kerry.getSpouse();

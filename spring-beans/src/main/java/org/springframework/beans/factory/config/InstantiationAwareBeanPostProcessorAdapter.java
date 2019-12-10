@@ -57,17 +57,28 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 		return bean;
 	}
 
+	/**
+	 * 实例化前调用的，返回null表示采用默认的实例化方法
+	 */
 	@Override
 	@Nullable
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	/**
+	 * 实例化后调用的
+	 * 返回true: 表示应该执行populateBean
+	 * 返回false：表示应该跳过执行populateBean
+	 */
 	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;
 	}
 
+	/**
+	 * 处理属性
+	 */
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
 			throws BeansException {
@@ -83,11 +94,17 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 		return pvs;
 	}
 
+	/**
+	 * 初始化之前调用的。  （要注意区分实例化和初始化）
+	 */
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	/**
+	 * 初始化之后调用的。  （要注意区分实例化和初始化）
+	 */
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
