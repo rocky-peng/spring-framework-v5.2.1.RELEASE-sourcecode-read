@@ -130,6 +130,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Name of the MessageSource bean in the factory.
 	 * If none is supplied, message resolution is delegated to the parent.
+	 * <p>
+	 * MessageBean的名字
 	 *
 	 * @see MessageSource
 	 */
