@@ -60,6 +60,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return the unique id of this application context.
+	 * <p>
+	 * 返回容器的唯一id，可以为null
 	 *
 	 * @return the unique id of the context, or {@code null} if none
 	 */
@@ -68,6 +70,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return a name for the deployed application that this context belongs to.
+	 * <p>
+	 * 返回容器的名字，可以是空字符串
 	 *
 	 * @return a name for the deployed application, or the empty String by default
 	 */
@@ -75,6 +79,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return a friendly name for this context.
+	 * <p>
+	 * 返回displayName,不能为null
 	 *
 	 * @return a display name for this context (never {@code null})
 	 */
@@ -82,6 +88,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return the timestamp when this context was first loaded.
+	 * <p>
+	 * 返回容器启动时间，单位：毫秒
 	 *
 	 * @return the timestamp (ms) when this context was first loaded
 	 */
@@ -90,6 +98,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	/**
 	 * Return the parent context, or {@code null} if there is no parent
 	 * and this is the root of the context hierarchy.
+	 * <p>
+	 * 返回父容器
 	 *
 	 * @return the parent context, or {@code null} if there is no parent
 	 */
