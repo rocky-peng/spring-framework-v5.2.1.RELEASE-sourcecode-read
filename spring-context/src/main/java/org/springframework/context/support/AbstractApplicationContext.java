@@ -157,8 +157,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	static {
-		// Eagerly load the ContextClosedEvent class to avoid weird classloader issues
+		// Eagerly load the ContextClosedEvent class to avoid weird（奇怪的） classloader issues
 		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+		// 哈哈哈，Spring开发人员也有疑惑的地方
 		ContextClosedEvent.class.getName();
 	}
 
@@ -169,18 +170,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected final Log logger = LogFactory.getLog(getClass());
 	/**
 	 * BeanFactoryPostProcessors to apply on refresh.
+	 * <p>
+	 * 用来保存BeanFactoryPostProcessor实例
 	 */
 	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 	/**
 	 * Flag that indicates whether this context is currently active.
+	 * <p>
+	 * 表示当前容器是否处于active状态
 	 */
 	private final AtomicBoolean active = new AtomicBoolean();
 	/**
 	 * Flag that indicates whether this context has been closed already.
+	 * <p>
+	 * 表示当前容器是否处于closed状态
 	 */
 	private final AtomicBoolean closed = new AtomicBoolean();
 	/**
 	 * Synchronization monitor for the "refresh" and "destroy".
+	 * <p>
+	 * 启动关闭的同步锁对象
 	 */
 	private final Object startupShutdownMonitor = new Object();
 	/**
@@ -189,14 +198,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 	/**
 	 * Unique id for this context, if any.
+	 *
+	 * 容器的id 算法是：类全名 + @ + hashCode的16进制字符串
 	 */
 	private String id = ObjectUtils.identityToString(this);
 	/**
 	 * Display name.
+	 *
+	 * 容器的名字，算法和 id 一致，两个的值应该也是一样的。
 	 */
 	private String displayName = ObjectUtils.identityToString(this);
 	/**
 	 * Parent context.
+	 *
+	 * 父容器
 	 */
 	@Nullable
 	private ApplicationContext parent;
@@ -207,15 +222,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ConfigurableEnvironment environment;
 	/**
 	 * System time in milliseconds when this context started.
+	 *
+	 * 容器启动的时间
 	 */
 	private long startupDate;
 	/**
 	 * Reference to the JVM shutdown hook, if registered.
+	 *
 	 */
 	@Nullable
 	private Thread shutdownHook;
 	/**
 	 * ResourcePatternResolver used by this context.
+	 *
+	 * 处理资源的
 	 */
 	private ResourcePatternResolver resourcePatternResolver;
 	/**
@@ -225,6 +245,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private LifecycleProcessor lifecycleProcessor;
 	/**
 	 * MessageSource we delegate our implementation of this interface to.
+	 *
+	 * 处理国际化的
 	 */
 	@Nullable
 	private MessageSource messageSource;
