@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
  * <p>An {@link org.springframework.context.ApplicationEventPublisher}, typically
  * a Spring {@link org.springframework.context.ApplicationContext}, can use an
  * {@code ApplicationEventMulticaster} as a delegate for actually publishing events.
+ * <p>
+ * 通常Spring的ApplicationContext的事件发布是委托给这个事件广播器来完成的
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -74,7 +76,7 @@ public interface ApplicationEventMulticaster {
 	/**
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
-	 * if possible as it provides better support for generics-based events.
+	 * if possible as it provides better support for generics-based events （泛型事件）.
 	 *
 	 * @param event the event to multicast
 	 */
