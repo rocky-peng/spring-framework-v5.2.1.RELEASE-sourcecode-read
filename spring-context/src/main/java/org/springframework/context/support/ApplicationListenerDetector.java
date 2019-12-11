@@ -61,20 +61,26 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 		this.singletonNames.put(beanName, beanDefinition.isSingleton());
 	}
 
+	/**
+	 * 初始化前调用的
+	 */
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
+	/**
+	 * 初始化后调用的
+	 */
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof ApplicationListener) {
 			// potentially not detected as a listener by getBeanNamesForType retrieval
-			Boolean flag = this.singletonNames.get(beanName);
-			if (Boolean.TRUE.equals(flag)) {
+			Boolean isSingleton = this.singletonNames.get(beanName);
+			if (Boolean.TRUE.equals(isSingleton)) {
 				// singleton bean (top-level or inner): register on the fly
 				this.applicationContext.addApplicationListener((ApplicationListener<?>) bean);
-			} else if (Boolean.FALSE.equals(flag)) {
+			} else if (Boolean.FALSE.equals(isSingleton)) {
 				if (logger.isWarnEnabled() && !this.applicationContext.containsBean(beanName)) {
 					// inner bean with other scope - can't reliably process events
 					logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface " +
