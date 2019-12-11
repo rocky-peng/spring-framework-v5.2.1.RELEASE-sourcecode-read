@@ -25,6 +25,8 @@ import org.springframework.lang.Nullable;
  * custom protocols to be handled without subclassing the loader
  * implementation (or application context implementation).
  *
+ * 针对特定协议的资源处理器。比如ftp://  file:///等等。可以自定义协议。比如： pqs://
+ *
  * @author Juergen Hoeller
  * @see DefaultResourceLoader#addProtocolResolver
  * @since 4.3

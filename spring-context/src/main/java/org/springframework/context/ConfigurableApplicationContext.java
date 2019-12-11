@@ -46,6 +46,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple context config paths in a single String value.
+	 * <p>
+	 * 配置文件分隔符：逗号、分号、空格、回车换行符
 	 *
 	 * @see org.springframework.context.support.AbstractXmlApplicationContext#setConfigLocation
 	 * @see org.springframework.web.context.ContextLoader#CONFIG_LOCATION_PARAM
@@ -56,6 +58,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
+	 * <p>
+	 * ConversionService的名字。如果没有进行指定，则使用默认的ConversionService
 	 *
 	 * @see org.springframework.core.convert.ConversionService
 	 * @since 3.0
@@ -74,6 +78,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Name of the {@link Environment} bean in the factory.
+	 * <p>
+	 * Environment实例的名字
 	 *
 	 * @since 3.1
 	 */
