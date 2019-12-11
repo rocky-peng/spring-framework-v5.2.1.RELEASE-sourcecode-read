@@ -192,25 +192,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * 启动关闭的同步锁对象
 	 */
 	private final Object startupShutdownMonitor = new Object();
-	/**
-	 * Statically specified listeners.
-	 */
-	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
+
 	/**
 	 * Unique id for this context, if any.
-	 *
+	 * <p>
 	 * 容器的id 算法是：类全名 + @ + hashCode的16进制字符串
 	 */
 	private String id = ObjectUtils.identityToString(this);
 	/**
 	 * Display name.
-	 *
+	 * <p>
 	 * 容器的名字，算法和 id 一致，两个的值应该也是一样的。
 	 */
 	private String displayName = ObjectUtils.identityToString(this);
 	/**
 	 * Parent context.
-	 *
+	 * <p>
 	 * 父容器
 	 */
 	@Nullable
@@ -222,19 +219,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ConfigurableEnvironment environment;
 	/**
 	 * System time in milliseconds when this context started.
-	 *
+	 * <p>
 	 * 容器启动的时间
 	 */
 	private long startupDate;
 	/**
 	 * Reference to the JVM shutdown hook, if registered.
-	 *
 	 */
 	@Nullable
 	private Thread shutdownHook;
 	/**
 	 * ResourcePatternResolver used by this context.
-	 *
+	 * <p>
 	 * 处理资源的
 	 */
 	private ResourcePatternResolver resourcePatternResolver;
@@ -245,7 +241,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private LifecycleProcessor lifecycleProcessor;
 	/**
 	 * MessageSource we delegate our implementation of this interface to.
-	 *
+	 * <p>
 	 * 处理国际化的
 	 */
 	@Nullable
@@ -256,7 +252,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Nullable
 	private ApplicationEventMulticaster applicationEventMulticaster;
 	/**
+	 * Statically specified listeners.
+	 */
+	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
+
+	/**
 	 * Local listeners registered before refresh.
+	 *
+	 * 这个集合包含的listener在applicationListener中也会包含。
 	 */
 	@Nullable
 	private Set<ApplicationListener<?>> earlyApplicationListeners;
@@ -469,12 +472,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Multicast right now if possible - or lazily once the multicaster is initialized
+		// 这里的代码不是很理解
 		if (this.earlyApplicationEvents != null) {
 			this.earlyApplicationEvents.add(applicationEvent);
 		} else {
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
+		// 发布一个事件后，不仅会在本容器中发布，还会在父容器中发布
 		// Publish event via parent context as well...
 		if (this.parent != null) {
 			if (this.parent instanceof AbstractApplicationContext) {
@@ -606,7 +611,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
-				//最后一步：发布事件
+				//最后一步：发布相关事件
+				//比如：ContextRefreshedEvent
+				//LifecycleProcessor.onRefresh方法
 				finishRefresh();
 			} catch (BeansException ex) {
 				if (logger.isWarnEnabled()) {
@@ -633,6 +640,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Prepare this context for refreshing, setting its startup date and
 	 * active flag as well as performing any initialization of property sources.
+	 * 1. 设置启动时间
+	 * 2. 设置active closed标志
+	 * 3. initProperSources
+	 *
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
@@ -705,6 +716,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+
+		// 这玩意干嘛的不是很理解
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
