@@ -131,7 +131,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Name of the MessageSource bean in the factory.
 	 * If none is supplied, message resolution is delegated to the parent.
 	 * <p>
-	 * MessageBean的名字
+	 * MessageService Bean的名字
 	 *
 	 * @see MessageSource
 	 */
@@ -159,6 +159,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	static {
 		// Eagerly load the ContextClosedEvent class to avoid weird（奇怪的） classloader issues
 		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+
 		// 哈哈哈，Spring开发人员也有疑惑的地方
 		ContextClosedEvent.class.getName();
 	}

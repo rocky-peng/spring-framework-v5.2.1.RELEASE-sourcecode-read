@@ -68,8 +68,16 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * Synchronization monitor for the internal BeanFactory.
 	 */
 	private final Object beanFactoryMonitor = new Object();
+
+	/**
+	 *  beandefinition是否能够覆盖
+	 */
 	@Nullable
 	private Boolean allowBeanDefinitionOverriding;
+
+	/**
+	 * 是否支持循环引用
+	 */
 	@Nullable
 	private Boolean allowCircularReferences;
 	/**
