@@ -40,11 +40,14 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 		implements BeanNameAware, InitializingBean {
 
 	/**
-	 * 保存用户传入的配置文件路径
+	 * 保存配置文件路径
 	 */
 	@Nullable
 	private String[] configLocations;
 
+	/**
+	 * 表示是否中了setId这个方法
+	 */
 	private boolean setIdCalled = false;
 
 
@@ -98,6 +101,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 			Assert.noNullElements(locations, "Config locations must not be null");
 			this.configLocations = new String[locations.length];
 			for (int i = 0; i < locations.length; i++) {
+				//resolvePath这个方法支持了占位符解析，所以说明配置文件的路径字符串也支持占位符
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
 		} else {
