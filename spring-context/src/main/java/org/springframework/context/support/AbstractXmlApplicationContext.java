@@ -45,6 +45,9 @@ import java.io.IOException;
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
+	/**
+	 * 表示是否使用 xml validation
+	 */
 	private boolean validating = true;
 
 
@@ -121,6 +124,8 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @see #getConfigLocations
 	 * @see #getResources
 	 * @see #getResourcePatternResolver
+	 * <p>
+	 * 执行XmlBeanDefinitionReader的两个loadBeanDefinitions方法。
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
 		Resource[] configResources = getConfigResources();
