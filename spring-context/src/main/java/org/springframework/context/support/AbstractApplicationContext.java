@@ -243,7 +243,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * MessageSource we delegate our implementation of this interface to.
 	 * <p>
-	 * 处理国际化的
+	 * 处理国际化的。
+	 *
+	 * 代理模式，因为ApplicationContext本身继承自MessageSource，然后这里又引用一个MessageSource实例
 	 */
 	@Nullable
 	private MessageSource messageSource;
